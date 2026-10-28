@@ -41,6 +41,7 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow
 .lbl{font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:.2em;fill:var(--paper);font-variation-settings:"wdth" 112}
 .lbl .d{fill:var(--paper-dim)}
 .lbl .l{fill:var(--lime)}
+.lbl.qmark{fill:var(--lime)}
 
 /* ---------- screen-space typography ---------- */
 #q,.qtwin{position:absolute;left:0;top:0;transform-origin:0 0;
@@ -76,6 +77,9 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow
 #hud i.now{background:var(--lime)}
 #help{position:absolute;left:var(--gx);bottom:max(18px,2.4vh);font-family:var(--mono);font-size:12px;line-height:1.9;
   letter-spacing:.08em;color:var(--paper-dim);background:rgba(11,12,10,.86);padding:16px 20px;border:1px solid var(--paper-faint)}
+#notes{position:absolute;left:var(--gx);right:var(--gx);top:max(70px,9vh);max-width:60ch;font-family:var(--mono);font-size:14px;line-height:1.7;
+  letter-spacing:.02em;color:var(--paper);background:rgba(11,12,10,.92);padding:16px 20px;border:1px solid var(--lime)}
+#notes small{display:block;color:var(--lime);letter-spacing:.16em;margin-bottom:6px}
 #help b{color:var(--paper);font-weight:500;display:inline-block;min-width:11ch}
 </style>
 
@@ -126,15 +130,45 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow
   <div class="stm low mid" data-k="st11" data-t="AI can give you|powerful capabilities."></div>
   <div class="stm low mid" data-k="st12" data-t="Your job is to turn them|into *real* *impact.*"></div>
 
+  <div class="stm low mid">
+    <div class="line" data-k="st13a" data-t="Need a photo? Call him."></div>
+    <div class="line" data-k="st13b" data-t="Need a video? Call him."></div>
+    <div class="line" data-k="st13c" data-t="Need a logo? Call him."></div>
+  </div>
+  <div class="stm low" data-k="st14" data-t="Everyone has *that* *one* *friend.*"></div>
+  <div class="stm low">
+    <div class="line" data-k="st15" data-t="Everyone has their photos."></div>
+    <div class="line" data-k="st16" data-t="But where are *you?*"></div>
+  </div>
+  <div class="stm low mid">
+    <div class="line" data-k="st17a" data-t="You can draw every circle yourself."></div>
+    <div class="line" data-k="st17b" data-t="Or let your *genie* draw it."></div>
+    <div class="line" data-k="st17c" data-t="And decide what to *build* with it."></div>
+  </div>
+  <div class="stm low mid">
+    <div class="line" data-k="st18" data-t="They don't just design buildings."></div>
+    <div class="line" data-k="st19" data-t="They explore what buildings *can* *become.*"></div>
+  </div>
+  <div class="stm low">
+    <div class="line" data-k="st20" data-t="Less time on repetition."></div>
+    <div class="line" data-k="st21" data-t="More time for *innovation.*"></div>
+  </div>
+  <div class="stm low">
+    <div class="line" data-k="st22" data-t="Don't just ask what AI can do."></div>
+    <div class="line" data-k="st23" data-t="Ask what *you* can do with it."></div>
+  </div>
+
   <div id="hint">Click or press → to begin</div>
   <div id="hud"></div>
+  <div id="notes" hidden></div>
   <div id="help" hidden>
     <b>→ / Space / Click</b> next reveal<br>
     <b>← / Right-click</b> previous reveal<br>
-    <b>1 – 5</b> jump to a slide<br>
+    <b>1 – 9</b> jump to a slide<br>
     <b>Home</b> back to black<br>
     <b>F</b> fullscreen &nbsp; <b>M</b> sound on/off<br>
-    <b>H</b> progress bar &nbsp; <b>?</b> this help
+    <b>H</b> progress bar &nbsp; <b>S</b> speaker notes<br>
+    <b>?</b> this help
   </div>
 </div>
 
@@ -641,6 +675,157 @@ const hitRings = [[3639, -262], [3812, -66]].map(([x, y]) => el('circle', { clas
 const gArrow = el('g', {}, cam); el('path', { d: 'M-12 -8 L0 0 L-12 8', class: 'ann', style: 'stroke-width:calc(var(--u)*2px)' }, gArrow);
 const nextT = txt(cam, 4262, 90, 'REAL-WORLD PROBLEMS →', 'mono', 'end'); nextT.style.fontSize = '18px';
 
+/* ---------- Slides 6–11: simple pieces on the same canvas (world x ≈ 4300–11000) ---------- */
+const PIECES = [], WLABELS = [], WLINES = [];
+// a line-art illustration that draws itself as S[key] goes 0 → 1 (win narrows that range)
+function piece(key, x, y, sc, paths, opt = {}) {
+  const g = artG(cam, opt.color || 'var(--paper)');
+  const els = paths.map(d => art(g, d));
+  const o = { key, x, y, sc, g, els, win: [0, 1], rot: 0, ...opt, fx: x };
+  PIECES.push(o); return o;
+}
+// a world label that fades in with S[key]
+function wlabel(key, x, y, str, cls, anchor = 'middle', size, win = [0, 1], okey) {
+  const e = txt(cam, x, y, str, cls, anchor); if (size) e.style.fontSize = size + 'px';
+  WLABELS.push({ e, key, win, okey, fx: x }); return e;
+}
+// a non-scaling line (hand or dashed) that draws with S[key]
+function wline(key, pts, cls = 'hand', win = [0, 1], seed = 0, amp = 0, okey) {
+  const l = amp ? new Line(tremor(smooth(pts, 12), amp, seed)) : new Line(pts.length > 2 ? smooth(pts, 12) : pts);
+  const e = el('path', { class: cls }, cam);
+  WLINES.push({ l, e, key, win, okey, fx: pts[0][0] }); return e;
+}
+const rr = (x0, y0, x1, y1, r) => `M${x0 + r} ${y0}L${x1 - r} ${y0}Q${x1} ${y0} ${x1} ${y0 + r}L${x1} ${y1 - r}Q${x1} ${y1} ${x1 - r} ${y1}L${x0 + r} ${y1}Q${x0} ${y1} ${x0} ${y1 - r}L${x0} ${y0 + r}Q${x0} ${y0} ${x0 + r} ${y0}Z`;
+const circ = (cx, cy, r) => `M${cx - r} ${cy}A${r} ${r} 0 1 0 ${cx + r} ${cy}A${r} ${r} 0 1 0 ${cx - r} ${cy}`;
+const stick = (hx, hy, arms = 'down') => circ(hx, hy, 12) + `M${hx} ${hy + 12}L${hx} ${hy + 58}M${hx} ${hy + 58}L${hx - 14} ${hy + 92}M${hx} ${hy + 58}L${hx + 14} ${hy + 92}` +
+  (arms === 'up' ? `M${hx} ${hy + 26}L${hx - 26} ${hy - 4}M${hx} ${hy + 26}L${hx + 26} ${hy - 4}` : arms === 'hold' ? `M${hx} ${hy + 26}L${hx - 22} ${hy + 22}L${hx - 30} ${hy + 6}M${hx} ${hy + 26}L${hx - 18} ${hy + 34}L${hx - 30} ${hy + 18}` : `M${hx} ${hy + 26}L${hx - 20} ${hy + 50}M${hx} ${hy + 26}L${hx + 20} ${hy + 50}`);
+
+// the journey line that carries the camera from slide 5 onwards
+const JL0 = 4268, JL1 = 10980;
+const jlPts = []; for (let x = JL0; x <= JL1; x += 120) jlPts.push([x, x === JL0 ? 118 : 132 + 12 * Math.sin(x * .004)]);
+const journey = new Line(tremor(smooth(jlPts, 10), 1.4, 131));
+const journeyEl = el('path', { class: 'hand' }, cam);
+
+/* Slide 6 — everyone has that one friend */
+const CAM_ICON = ['M-70 -36L-30 -36L-20 -52L20 -52L30 -36L70 -36Q80 -36 80 -26L80 40Q80 50 70 50L-70 50Q-80 50 -80 40L-80 -26Q-80 -36 -70 -36Z',
+  circ(0, 8, 30), circ(0, 8, 17), 'M48 -26L66 -26L66 -16L48 -16Z', 'M-62 -42L-44 -42'];
+piece('i6a', 4580, -200, 1, CAM_ICON);
+wline('i6a', [[4580 + 57, -246], [4580 + 70, -262]], 'ann', [.7, .8]); wline('i6a', [[4580 + 66, -238], [4580 + 84, -244]], 'ann', [.75, .85]);
+piece('i6b', 4900, -200, 1, ['M-100 -40L100 -40L100 40L-100 40Z', 'M-100 0L100 0',
+  'M-92 -32L-40 -32L-40 -8L-92 -8ZM-34 -32L30 -32L30 -8L-34 -8ZM36 -32L92 -32L92 -8L36 -8Z',
+  'M-92 20L-84 10L-76 28L-68 6L-60 24L-52 14L-44 30L-36 8L-28 22L-20 12L-12 26L-4 10L4 22L12 6L20 28L28 14L36 24L44 8L52 20L60 12L68 26L76 10L84 22L92 16', 'M-10 -74L10 -62L-10 -50Z']);
+const playhead = el('line', { class: 'ann', style: 'stroke-width:calc(var(--u)*2px)' }, cam);
+piece('i6c', 5220, -200, 1, [circ(0, 0, 46), 'M-26 22L0 -26L26 22Z', 'M-46 0L46 0']);
+const logoDot = el('circle', { class: 'fill-lime', cx: 5220, cy: -204, r: 7 }, cam);
+wlabel('i6a', 4580, -118, 'PHOTO', 'mono p', 'middle', 14, [.6, 1]);
+wlabel('i6b', 4900, -118, 'VIDEO', 'mono p', 'middle', 14, [.6, 1]);
+wlabel('i6c', 5220, -118, 'LOGO', 'mono p', 'middle', 14, [.6, 1]);
+piece('f6', 4900, 0, 1, [stick(0, 18, 'up')]);
+wline('f6', [[4900 - 28, -14], [4900 - 40, -26]], 'ann', [.6, .7]); wline('f6', [[4900 + 28, -14], [4900 + 40, -26]], 'ann', [.6, .7]);
+wline('f6', [[4580, -104], [4880, 4]], 'cons dash', [.3, .8]);
+wline('f6', [[4900, -104], [4900, -2]], 'cons dash', [.35, .85]);
+wline('f6', [[5220, -104], [4920, 4]], 'cons dash', [.4, .9]);
+
+/* Slide 7 — but who's behind the camera? */
+const SKETCH = {
+  group: circ(-24, -26, 7) + circ(0, -30, 7) + circ(24, -26, 7) + 'M-24 -19L-24 10M0 -23L0 10M24 -19L24 10M-36 -6L36 -6',
+  cap: 'M-34 -14L0 -30L34 -14L0 2ZM-18 -6L-18 12Q0 20 18 12L18 -6M34 -14L34 6',
+  ball: circ(0, -6, 24) + 'M0 -16L10 -9L6 3L-6 3L-10 -9Z',
+  cake: 'M-26 0L26 0L26 26L-26 26ZM-26 10Q-13 16 0 10Q13 4 26 10M-12 0L-12 -14M0 0L0 -16M12 0L12 -14',
+  trip: 'M-40 26L-14 -10L2 10L18 -18L40 26' + circ(24, -30, 8),
+  stage: circ(0, -22, 9) + 'M0 -13L0 24M-14 24L14 24M22 -30L22 -6M22 -30L32 -26',
+};
+const POL = [['group', 5650, -250, -6], ['cap', 5800, -268, 4], ['ball', 5950, -244, -3], ['trip', 6100, -262, 6], ['cake', 5720, -100, 3], ['stage', 5880, -92, -5], ['group', 6030, -108, 4]];
+POL.forEach(([k, x, y, rot], i) => piece('p7', x, y, 1, ['M-60 -70L60 -70L60 70L-60 70Z', 'M-50 -60L50 -60L50 36L-50 36Z', SKETCH[k]],
+  { rot, win: [i / POL.length * .6, i / POL.length * .6 + .4], drop: true }));
+piece('e7', 6180, -100, 1, ['M-60 -70L60 -70L60 70L-60 70Z', circ(0, -26, 14) + 'M-26 22Q-26 -8 0 -8Q26 -8 26 22'], { rot: -4, dashed: true });
+wlabel('e7', 6180, -8, '?', 'lbl', 'middle', 42, [.5, 1]).classList.add('qmark');
+piece('ph7', 6380, 18, 1, [stick(0, 0, 'hold')]);
+piece('ph7', 6346, 20, .32, CAM_ICON);
+const phRing = el('path', { class: 'ann dash' }, cam);
+
+/* Slide 8 — draw the circle, or decide what to build */
+const H8 = new Line(handPts.map(p => [6560 + p[0] * 105 / 180, -150 + p[1] * 105 / 180]));
+const h8El = el('path', { class: 'hand' }, cam);
+const P8 = new Line(circlePts(6880, -150, 105, 360));
+const p8El = el('path', { class: 'perfect' }, cam);
+const gP8head = el('g', {}, cam); el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 3.4 }, gP8head);
+const gP8pt = el('g', {}, cam); el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 3.4 }, gP8pt);
+piece('l8', 6850, 20, .42, [LAMP.foot, LAMP.body, LAMP.band, LAMP.handle, LAMP.lid]);
+wline('l8', [[6850 + 128 * .42, 20 - 60 * .42], [6905, -10], [6895, -30], [6884, -45]], 'guide', [.5, 1], 141, 2.2);
+wline('a8', [[7080, 20], [7430, 20]], 'hand', [0, .25], 151, .8);
+const arcPts = (cx, cy, r) => Array.from({ length: 49 }, (_, i) => { const a = Math.PI + Math.PI * i / 48; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; });
+wline('a8', arcPts(7250, 20, 160), 'perfect', [.15, .55]);
+wline('a8', arcPts(7180, 20, 96), 'perfect', [.3, .65]);
+wline('a8', arcPts(7330, 20, 86), 'perfect', [.4, .75]);
+for (let i = 0; i < 5; i++) { const a = Math.PI + Math.PI * (i + 1) / 6; wline('a8', [[7250, 20], [7250 + 160 * Math.cos(a), 20 + 160 * Math.sin(a)]], 'cons', [.55 + i * .05, .7 + i * .05]); }
+piece('a8', 7395, 20, .42, [stick(0, -92)], { win: [.7, 1] });
+wline('a8', [[6985, -150], [7250, -140]], 'guide dash', [.6, .9]);
+wlabel('a8', 7250, 52, 'CONCEPT', 'mono p', 'middle', 13, [.8, 1]);
+
+/* Slide 9 — Zaha Hadid Architects */
+const IMG1 = { x: 7590, y: -360, w: 560, h: 560 * 1209 / 2000 }, IMG2 = { x: 8190, y: -21 - 520 * 394 / 779, w: 520, h: 520 * 394 / 779 };
+const img1 = el('image', { href: 'assets/heydar-aliyev-sky.jpg', x: IMG1.x, y: IMG1.y, width: IMG1.w, height: IMG1.h, preserveAspectRatio: 'xMidYMid slice' }, cam);
+const img2 = el('image', { href: 'assets/heydar-aliyev-dusk.jpg', x: IMG2.x, y: IMG2.y, width: IMG2.w, height: IMG2.h, preserveAspectRatio: 'xMidYMid slice' }, cam);
+const corners = (b, key) => { const k = 14; for (const [cx, cy, sx, sy] of [[b.x, b.y, 1, 1], [b.x + b.w, b.y, -1, 1], [b.x, b.y + b.h, 1, -1], [b.x + b.w, b.y + b.h, -1, -1]])
+  wline(key, [[cx + sx * k, cy - sy * 6], [cx - sx * 6, cy - sy * 6], [cx - sx * 6, cy + sy * k]], 'ann', [.3, .8]); };
+corners(IMG1, 'im1'); corners(IMG2, 'im2');
+wlabel('z9', IMG2.x, IMG2.y - 26, 'ZAHA HADID ARCHITECTS', 'lbl', 'start', 28, [0, .6]);
+wlabel('z9', IMG2.x, IMG2.y - 62, 'COMPUTATIONAL DESIGN', 'mono', 'start', 13, [.3, .8]);
+wline('sk9', [[7610, -30], [7650, -180], [7700, -300], [7760, -336], [7820, -300], [7880, -200], [7950, -120], [8020, -96], [8080, -120], [8140, -40]], 'hand', [0, .8], 161, 1.6, 'sk9O');
+wline('sk9', [[7590, -24], [8150, -24]], 'hand', [.5, 1], 162, .6, 'sk9O');
+wlabel('im1', IMG1.x, 4, 'HEYDAR ALIYEV CENTER · BAKU', 'mono p', 'start', 12, [.6, 1]);
+wlabel('im2', IMG2.x, 4, 'SAME BUILDING · AT DUSK', 'mono p', 'start', 12, [.6, 1]);
+
+/* Slide 10 — less repetition, more innovation */
+wline('div10', [[9160, -360], [9160, 10]], 'cons', [0, 1]);
+wlabel('l10', 8945, -350, 'BEFORE · REPEAT', 'mono p', 'middle', 13, [0, .3]);
+wlabel('r10', 9470, -350, 'AFTER · EXPLORE', 'mono', 'middle', 13, [0, .3]);
+for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) {
+  const i = r * 4 + c, x = 8840 + c * 70, y = -300 + r * 92;
+  piece('l10', x, y, 1, [rr(-24, -24, 24, 24, 4), circ((i % 3) - 1, ((i >> 1) % 3) - 1, 13)], { win: [.1 + i * .05, .3 + i * .05] });
+  wlabel('l10', x, y + 42, 'v' + String(i + 1).padStart(2, '0'), 'mono p', 'middle', 10, [.2 + i * .05, .4 + i * .05]);
+}
+const CROPS = [[120, 330], [820, 600], [1500, 600]];
+const crops = CROPS.map(([cx, cy], i) => {
+  const x = 9230 + i * 172, y = -300;
+  const s = el('svg', { x, y, width: 150, height: 190, viewBox: `${cx} ${cy} 440 557`, preserveAspectRatio: 'xMidYMid slice' }, cam);
+  el('image', { href: 'assets/heydar-aliyev-sky.jpg', x: 0, y: 0, width: 2000, height: 1209 }, s);
+  wlabel('r10', x + 75, -82, 'OPTION ' + 'ABC'[i], 'mono p', 'middle', 12, [.3 + i * .15, .5 + i * .15]);
+  return { s, x, y, win: [i * .2, .4 + i * .2] };
+});
+const pickEl = el('path', { class: 'ann', d: `M${9402 - 8} ${-308}L${9402 + 158} ${-308}L${9402 + 158} ${-102}L${9402 - 8} ${-102}Z`, style: 'stroke-width:calc(var(--u)*1.6px)' }, cam);
+pickEl.setAttribute('pathLength', 1);
+
+/* Slide 11 — apply it to yourself */
+const IT = [9900, 10180, 10460, 10740];
+piece('k1', IT[0], -200, 1, ['M-22 10C-40 -6 -36 -44 0 -46C36 -44 40 -6 22 10L18 26L-18 26Z', 'M-14 34L14 34M-10 42L10 42']);
+wline('k1', [[IT[0], -262], [IT[0], -274]], 'ann', [.6, .7]); wline('k1', [[IT[0] - 38, -250], [IT[0] - 46, -258]], 'ann', [.65, .75]); wline('k1', [[IT[0] + 38, -250], [IT[0] + 46, -258]], 'ann', [.7, .8]);
+piece('k2', IT[1], -200, 1, ['M-60 -46L60 -46L60 34L-60 34Z', 'M-12 34L-16 50M12 34L16 50M-26 50L26 50']);
+piece('k2', IT[1], -200, 1, [circ(-34, -20, 10), circ(0, -20, 14), circ(34, -20, 7), 'M-46 14Q-34 -2 -22 14', 'M-12 14Q0 -6 12 14', 'M22 14Q34 2 46 14'], { color: 'var(--lime)', win: [.4, 1] });
+piece('k3', IT[2], -200, 1, ['M-46 30L46 30', 'M-30 30L-30 -10L0 -34L30 -10L30 30', 'M-8 30L-8 8L8 8L8 30']);
+wline('k3', [[IT[2] - 30, -256], [IT[2] + 30, -256]], 'cons dash', [.6, .9]); wline('k3', [[IT[2] - 30, -262], [IT[2] - 30, -250]], 'cons', [.7, .9]); wline('k3', [[IT[2] + 30, -262], [IT[2] + 30, -250]], 'cons', [.7, .9]);
+{ const a = []; for (let x = -60; x <= 60; x += 6) a.push([IT[3] + x, -180 + 40 * Math.pow(x / 60, 2) - 40]);
+  wline('k4', a, 'hand', [0, .4], 171, .6); wline('k4', [[IT[3] - 70, -180], [IT[3] + 70, -180]], 'hand', [.2, .5], 172, .5);
+  for (let i = 0; i < 5; i++) { const x = -40 + i * 20; wline('k4', [[IT[3] + x, -180 + 40 * Math.pow(x / 60, 2) - 40], [IT[3] + x, -181]], 'hand', [.4 + i * .05, .5 + i * .05]); } }
+piece('k4', IT[3] - 30, -180, .3, [stick(0, -92)], { win: [.6, .9] }); piece('k4', IT[3] + 16, -180, .3, [stick(0, -92)], { win: [.65, .95] });
+const k4ring = el('circle', { class: 'ring', cx: IT[3], cy: -200, r: 88 }, cam);
+const CAP = [['START WITH AN IDEA.', ''], ['USE ', 'AI', ' TO EXPLORE IT.'], ['APPLY YOUR JUDGEMENT.', ''], ['BUILD SOMETHING USEFUL.', '']];
+CAP.forEach((c, i) => {
+  const e = wlabel('k' + (i + 1), IT[i], -96, '', 'lbl', 'middle', 15, [.5, 1]);
+  e.innerHTML = c.length === 3 ? `<tspan>${c[0]}</tspan><tspan class="l">${c[1]}</tspan><tspan>${c[2]}</tspan>` : c[0];
+  e.style.letterSpacing = '.1em';
+});
+for (let i = 0; i < 3; i++) { wline('k' + (i + 2), [[IT[i] + 74, -200], [IT[i + 1] - 74, -200]], 'hand', [0, .3], 181 + i, .8); wline('k' + (i + 2), [[IT[i + 1] - 84, -208], [IT[i + 1] - 74, -200], [IT[i + 1] - 84, -192]], 'hand', [.25, .35]); }
+
+/* Speaker notes (press S) */
+const N6 = 'Ask: “Who was that friend you called to design the front page of your school assignments or projects?” Then share how you were the person people called for photos, videos, logos and other creative work.';
+const N7 = 'Being the go-to person is great in college. But what happens when college ends? The problem isn\'t being that person. The question is whether you keep growing beyond that role.';
+const N8 = 'AI can help with repetitive tasks, giving us more time to think, design, explore ideas and solve problems. Human understanding and fundamentals still matter.';
+const N9 = 'Introduce Zaha Hadid Architects. Computational design and digital tools help architects explore complex forms and evaluate design alternatives. Human creativity, engineering expertise and judgement stay central. AI alone did not create these buildings.';
+const N10 = 'Technology can speed up parts of a workflow and help professionals explore alternatives. People still evaluate the options, make decisions and make sure the result meets real requirements.';
+const N11 = 'Bring it back to the students. They don\'t need to become AI experts overnight. Start with the skills you already have, use AI to explore possibilities, apply your own judgement, and work towards solving meaningful problems.';
+
 /* ================================================================
    Steps: each click sets new targets; a key may take a sequence of segments.
    ================================================================ */
@@ -654,6 +839,9 @@ const D = {
   cont: 0, lamp: 0, lglow: 0, lid: 0, smoke: 0, genie: 0, jIn: 0, greed: 0, wish: 0, tf: 0, b6: 0, rattle: 0,
   dis: 0, morph: 0, pcirc: 0, aiT: 0, lampsO: 1, routes: 0, traces: 0, outc: 0,
   st6: 0, st7: 0, st8: 0, st9: 0, st10: 0, st11: 0, st12: 0,
+  jl: 0, i6a: 0, i6b: 0, i6c: 0, f6: 0, p7: 0, e7: 0, ph7: 0, hl7: 0, h8: 0, l8: 0, p8: 0, a8: 0,
+  z9: 0, sk9: 0, sk9O: 1, im1: 0, im2: 0, div10: 0, l10: 0, r10: 0, pick: 0, k1: 0, k2: 0, k3: 0, k4: 0,
+  st13a: 0, st13b: 0, st13c: 0, st14: 0, st15: 0, st16: 0, st17a: 0, st17b: 0, st17c: 0, st18: 0, st19: 0, st20: 0, st21: 0, st22: 0, st23: 0,
 };
 const STEPS = [
   { s: 1, n: 'Black' },
@@ -745,10 +933,55 @@ const STEPS = [
     lampsO: { to: 0, dur: 1.4 }, routes: { to: 1, dur: 2.6, delay: .6, ease: 'linear' }, traces: { to: 1, dur: 2.2, delay: 2, ease: 'linear' },
     outc: { to: 1, dur: 2.4, delay: 2.4, ease: 'linear' }, st12: { to: 1, dur: 2, delay: 3, ease: 'linear' } },
 
+  { s: 6, n: 'Need a photo? Call him.', note: N6,
+    st12: { to: 0, dur: .6 }, camX: { to: 4900, dur: 3.2 }, camY: { to: -50, dur: 3.2 }, camZ: { to: 1.2, dur: 3.2 },
+    jl: { to: 5440, dur: 2.8, delay: .2, ease: 'inOutSine' }, i6a: { to: 1, dur: 1.4, delay: 2.2, ease: 'linear' }, st13a: { to: 1, dur: 1.2, delay: 2.6, ease: 'linear' } },
+  { s: 6, n: 'Need a video? Call him.', note: N6, i6b: { to: 1, dur: 1.4, ease: 'linear' }, st13b: { to: 1, dur: 1.2, delay: .4, ease: 'linear' } },
+  { s: 6, n: 'Need a logo? Call him.', note: N6, i6c: { to: 1, dur: 1.4, ease: 'linear' }, st13c: { to: 1, dur: 1.2, delay: .4, ease: 'linear' } },
+  { s: 6, n: 'Everyone has that one friend', note: N6,
+    st13a: { to: 0, dur: .5 }, st13b: { to: 0, dur: .5 }, st13c: { to: 0, dur: .5 }, f6: { to: 1, dur: 2, ease: 'linear' }, st14: { to: 1, dur: 1.4, delay: 1.1, ease: 'linear' } },
+
+  { s: 7, n: 'Everyone has their photos', note: N7,
+    st14: { to: 0, dur: .5 }, camX: { to: 5900, dur: 3 }, camY: { to: -80, dur: 3 },
+    jl: { to: 6460, dur: 2.6, ease: 'inOutSine' }, p7: { to: 1, dur: 2.4, delay: 1.6, ease: 'linear' }, st15: { to: 1, dur: 1.4, delay: 2.6, ease: 'linear' } },
+  { s: 7, n: 'But where are you?', note: N7,
+    camX: { to: 6000, dur: 2.4 }, camY: { to: -60, dur: 2.4 }, camZ: { to: 1, dur: 2.4 }, e7: { to: 1, dur: 1.2, delay: .7, ease: 'linear' },
+    ph7: { to: 1, dur: 1.6, delay: 1.2, ease: 'linear' }, hl7: { to: 1, dur: 1.2, delay: 2.4 }, st16: { to: 1, dur: 1.2, delay: 2, ease: 'linear' } },
+
+  { s: 8, n: 'Draw every circle yourself', note: N8, fx: [['pen', 2.2], ['scratch', 2.3, 2.4]],
+    st15: { to: 0, dur: .5 }, st16: { to: 0, dur: .5 }, camX: { to: 6990, dur: 3 }, camY: { to: -40, dur: 3 }, camZ: { to: 1.2, dur: 3 },
+    jl: { to: 7480, dur: 2.6, ease: 'inOutSine' }, h8: { to: 1, dur: 2.6, delay: 2.2, ease: 'linear' }, st17a: { to: 1, dur: 1.4, delay: 2.4, ease: 'linear' } },
+  { s: 8, n: 'Or let your genie draw it', note: N8, fx: [['tone', 1]],
+    l8: { to: 1, dur: 1.2, ease: 'linear' }, p8: { to: 1, dur: 1.8, delay: 1.1 }, st17b: { to: 1, dur: 1.2, delay: .6, ease: 'linear' } },
+  { s: 8, n: 'Decide what to build', note: N8, a8: { to: 1, dur: 2.8, ease: 'linear' }, st17c: { to: 1, dur: 1.4, delay: .8, ease: 'linear' } },
+
+  { s: 9, n: 'Zaha Hadid Architects', note: N9,
+    st17a: { to: 0, dur: .5 }, st17b: { to: 0, dur: .5 }, st17c: { to: 0, dur: .5 }, camX: { to: 8150, dur: 3.2 }, camY: { to: -72, dur: 3.2 },
+    jl: { to: 8740, dur: 2.8, ease: 'inOutSine' }, z9: { to: 1, dur: 1.4, delay: 2.4, ease: 'linear' }, sk9: { to: 1, dur: 2.2, delay: 2.8, ease: 'linear' } },
+  { s: 9, n: "They don't just design buildings", note: N9,
+    im1: { to: 1, dur: 1.4 }, sk9O: { to: 0, dur: 1.2, delay: .6 }, st18: { to: 1, dur: 1.4, delay: 1, ease: 'linear' } },
+  { s: 9, n: 'What buildings can become', note: N9, im2: { to: 1, dur: 1.4 }, st19: { to: 1, dur: 1.6, delay: .9, ease: 'linear' } },
+
+  { s: 10, n: 'Less time on repetition', note: N10,
+    st18: { to: 0, dur: .5 }, st19: { to: 0, dur: .5 }, camX: { to: 9280, dur: 3.2 }, camY: { to: -60, dur: 3.2 },
+    jl: { to: 9800, dur: 2.8, ease: 'inOutSine' }, div10: { to: 1, dur: 1, delay: 2.2 }, l10: { to: 1, dur: 2.2, delay: 2.4, ease: 'linear' },
+    st20: { to: 1, dur: 1.4, delay: 2.8, ease: 'linear' } },
+  { s: 10, n: 'More time for innovation', note: N10,
+    r10: { to: 1, dur: 1.8, ease: 'linear' }, pick: { to: 1, dur: 1, delay: 2.2 }, st21: { to: 1, dur: 1.4, delay: .9, ease: 'linear' } },
+
+  { s: 11, n: 'Start with an idea', note: N11,
+    st20: { to: 0, dur: .5 }, st21: { to: 0, dur: .5 }, camX: { to: 10320, dur: 3.2 }, camY: { to: -55, dur: 3.2 },
+    jl: { to: 10980, dur: 3, ease: 'inOutSine' }, k1: { to: 1, dur: 1.4, delay: 2.4, ease: 'linear' } },
+  { s: 11, n: 'Use AI to explore it', note: N11, k2: { to: 1, dur: 1.6, ease: 'linear' } },
+  { s: 11, n: 'Apply your judgement', note: N11, k3: { to: 1, dur: 1.6, ease: 'linear' } },
+  { s: 11, n: 'Build something useful', note: N11, k4: { to: 1, dur: 1.8, ease: 'linear' } },
+  { s: 11, n: "Don't just ask what AI can do", note: N11, st22: { to: 1, dur: 1.4, ease: 'linear' } },
+  { s: 11, n: 'Ask what you can do with it', note: N11, st23: { to: 1, dur: 1.4, ease: 'linear' } },
+
 ];
 const LAST = STEPS.length - 1;
-const SLIDE_START = { 1: 1, 2: 6, 3: 12, 4: 17, 5: 22 };
-const META = new Set(['s', 'n', 'fx']);
+const SLIDE_START = { 1: 1, 2: 6, 3: 12, 4: 17, 5: 22, 6: 31, 7: 35, 8: 37, 9: 40 };
+const META = new Set(['s', 'n', 'fx', 'note']);
 const norm = v => typeof v === 'number' ? [{ to: v }] : Array.isArray(v) ? v : [v];
 function targetAt(n) {
   const t = { ...D };
@@ -834,13 +1067,18 @@ function jump(n) {
   for (const k in TR) delete TR[k];
   Object.assign(S, targetAt(n)); cur = n; afterNav();
 }
-const CHAP = { 1: '01 · The human circle', 2: '02 · AI draws it perfectly', 3: '03 · Beyond perfection', 4: '04 · Adapt to survive', 5: '05 · The genie' };
+const CHAP = { 1: '01 · The human circle', 2: '02 · AI draws it perfectly', 3: '03 · Beyond perfection', 4: '04 · Adapt to survive', 5: '05 · The genie', 6: '06 · That one friend', 7: '07 · Behind the camera', 8: '08 · Draw it, or build with it', 9: '09 · Zaha Hadid Architects', 10: '10 · Less repetition', 11: '11 · Apply it to yourself' };
 let chapShown = 1;
 function afterNav() {
   try { history.replaceState(null, '', '#step-' + cur); } catch (e) {}
   const s = STEPS[cur].s;
   if (s !== chapShown) { const c = $('#chap'); c.style.opacity = 0; setTimeout(() => { c.textContent = CHAP[s]; c.style.opacity = 1; }, 600); chapShown = s; }
-  renderHud();
+  renderHud(); renderNotes();
+}
+function renderNotes() {
+  const box = $('#notes'); if (box.hidden) return;
+  const st = STEPS[cur];
+  box.innerHTML = `<small>${String(cur).padStart(2, '0')} · ${st.n}</small>${st.note || 'No speaker note for this step.'}`;
 }
 
 /* ================================================================
@@ -899,7 +1137,7 @@ function renderType() {
   qEl.style.filter = q < .99 ? `blur(${f2((1 - q) * 10)}px)` : 'none';
   $('#corner').style.opacity = S.corner * .9;
   $('#hint').style.opacity = S.hint * .6;
-  $('#scrim').style.opacity = Math.max(S.st3, S.st4, S.st5, S.st1a * .6, S.st6, S.st7, S.st8, S.st9, S.st11, S.st12);
+  $('#scrim').style.opacity = Math.max(S.st3, S.st4, S.st5, S.st1a * .6, S.st6, S.st7, S.st8, S.st9, S.st11, S.st12, S.st13a, S.st14, S.st15, S.st17a, S.st18, S.st20, S.st22);
 }
 
 /* ================================================================
@@ -1293,6 +1531,41 @@ function renderWorld(dt) {
   gArrow.setAttribute('transform', `translate(${f2(ae[0])} ${f2(ae[1])}) rotate(${f2(Math.atan2(ae[1] - ab[1], ae[0] - ab[0]) * 180 / Math.PI)}) scale(${inv.toFixed(4)})`);
   show(gArrow, S.traces > .99 ? 1 : 0);
   nextT.style.opacity = seg(S.outc, .7, 1);
+
+  // ---------- slides 6–11 ----------
+  journeyEl.setAttribute('d', S.jl > JL0 ? journey.d(0, clamp((S.jl - JL0) / (JL1 - JL0))) : '');
+  journeyEl.style.opacity = 1 - .85 * Math.max(S.st13a, S.st14, S.st15, S.st17a, S.st18, S.st20, S.st22);
+  const spot = x => S.camX < 4400 ? 1 : 1 - .85 * E.inOutSine(clamp((Math.abs(x - S.camX) - 520) / 160));
+  for (const o of PIECES) {
+    const p = seg(S[o.key], o.win[0], o.win[1]);
+    if (p <= 0) { o.g.style.display = 'none'; continue; }
+    o.g.style.display = '';
+    placeG(o.g, o.x, o.y - (o.drop ? 26 * (1 - E.out(p)) : 0), o.sc, o.rot);
+    o.els.forEach((e, i) => { drawA(e, o.drop ? 1 : seg(p, i / o.els.length * .5, i / o.els.length * .5 + .5)); if (o.dashed) { e.style.strokeDasharray = '.025 .02'; e.style.strokeDashoffset = 0; } });
+    o.g.style.opacity = (o.drop ? E.out(p) : 1) * spot(o.fx);
+  }
+  for (const w of WLABELS) w.e.style.opacity = seg(S[w.key], w.win[0], w.win[1]) * (w.okey ? S[w.okey] : 1) * spot(w.fx);
+  for (const w of WLINES) { w.e.setAttribute('d', w.l.d(0, E.inOutSine(seg(S[w.key], w.win[0], w.win[1])))); w.e.style.opacity = (w.okey ? S[w.okey] : 1) * spot(w.fx); }
+  const ph = (now * .35) % 1;
+  playhead.setAttribute('x1', f2(4808 + 184 * ph)); playhead.setAttribute('x2', f2(4808 + 184 * ph));
+  playhead.setAttribute('y1', -244); playhead.setAttribute('y2', -156); playhead.style.opacity = seg(S.i6b, .8, 1) * spot(4900);
+  logoDot.style.opacity = seg(S.i6c, .8, 1) * spot(5220);
+  phRing.style.opacity = spot(6372);
+  phRing.setAttribute('d', circD(6372, 0, 92, -Math.PI / 2, TAU * E.inOut(S.hl7), 64));
+  // slide 8: hand circle, then the genie's precise circle
+  h8El.setAttribute('d', H8.d(0, penF(S.h8)));
+  p8El.setAttribute('d', P8.d(0, S.p8));
+  const p8h = P8.at(S.p8);
+  gP8head.setAttribute('transform', `translate(${f2(p8h[0])} ${f2(p8h[1])}) scale(${inv.toFixed(4)})`); show(gP8head, S.p8 > 0 && S.p8 < 1 ? 1 : 0);
+  gP8pt.setAttribute('transform', `translate(6880 -150) scale(${inv.toFixed(4)})`); show(gP8pt, S.p8 > 0 ? 1 : 0);
+  // slide 9 images
+  img1.style.opacity = E.inOut(S.im1) * spot(IMG1.x + IMG1.w / 2); img2.style.opacity = E.inOut(S.im2) * spot(IMG2.x + IMG2.w / 2);
+  // slide 10 crops and the reviewed option
+  crops.forEach(c => { const k = E.out(seg(S.r10, c.win[0], c.win[1])); c.s.style.opacity = k * spot(c.x + 75); c.s.setAttribute('y', f2(c.y + 18 * (1 - k))); });
+  drawA(pickEl, S.pick); pickEl.style.opacity = spot(9480);
+  // slide 11 outcome ring
+  k4ring.style.opacity = seg(S.k4, .8, 1) * .8 * spot(IT[3]);
+  h8El.style.opacity = spot(6560); p8El.style.opacity = spot(6880); gP8pt.style.opacity = spot(6880);
 }
 
 /* ================================================================
@@ -1302,7 +1575,7 @@ const hud = $('#hud');
 let hudPinned = false, hudTimer = 0;
 function renderHud() {
   let html = `<span>${String(cur).padStart(2, '0')} / ${LAST}</span>`;
-  for (const s of [1, 2, 3, 4, 5]) {
+  for (let s = 1; s <= 11; s++) {
     html += '<span class="grp">';
     STEPS.forEach((st, i) => { if (i && st.s === s) html += `<i class="${i === cur ? 'now' : i < cur ? 'done' : ''}" title="${st.n}"></i>`; });
     html += '</span>';
@@ -1326,6 +1599,7 @@ addEventListener('keydown', e => {
   else if (k === 'm' || k === 'M') muted = !muted;
   else if (k === 'h' || k === 'H') { hudPinned = !hudPinned; hud.classList.toggle('on', hudPinned); }
   else if (k === '?' || k === '/') { const h = $('#help'); h.hidden = !h.hidden; }
+  else if (k === 's' || k === 'S') { const h = $('#notes'); h.hidden = !h.hidden; renderNotes(); }
 });
 addEventListener('pointerdown', e => { if (e.button === 0) { ac(); go(cur + 1); } });
 addEventListener('contextmenu', e => { e.preventDefault(); go(cur - 1); });
