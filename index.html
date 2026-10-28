@@ -53,6 +53,9 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow
 .stm .hl{color:var(--lime)}
 .low{left:var(--gx);right:var(--gx);bottom:clamp(26px,8vh,100px);font-size:clamp(26px,4.3vw,92px)}
 .low.big{font-size:clamp(30px,5.8vw,124px)}
+.low.mid{font-size:clamp(22px,3.4vw,74px)}
+#world .head{fill:var(--paper);stroke:none}
+.beam{stroke:var(--lime);stroke-width:calc(var(--u)*2.2px)}
 .side{left:60%;right:var(--gx);top:50%;transform:translateY(-50%);font-size:clamp(28px,5vw,104px)}
 .qm{display:inline-block;margin-left:-.2em;color:var(--lime);opacity:0}
 #scrim{position:absolute;left:0;right:0;bottom:0;height:46vh;opacity:0;
@@ -86,6 +89,13 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow
     <mask id="rowMask" maskUnits="userSpaceOnUse" x="-3000" y="-3000" width="6000" height="6000">
       <rect x="-3000" y="-3000" width="6000" height="6000" fill="url(#rowFade)"/>
     </mask>
+    <linearGradient id="terrFade" gradientUnits="userSpaceOnUse" x1="1180" y1="0" x2="2320" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".1" stop-color="#fff" stop-opacity="1"/>
+      <stop offset=".82" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="terrMask" maskUnits="userSpaceOnUse" x="-3000" y="-3000" width="9000" height="6000">
+      <rect x="-3000" y="-3000" width="9000" height="6000" fill="url(#terrFade)"/>
+    </mask>
   </defs>
   <g id="cam"></g>
 </svg>
@@ -105,12 +115,35 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow
   <div class="stm low big" data-k="st4" data-t="Don't just be perfect.|*Be* *valuable.*"></div>
   <div class="stm low" data-k="st5" data-t="Don't compete with AI at being perfect.|Learn to *go* *beyond* *it.*"></div>
 
+  <div class="stm low">
+    <div class="line" data-k="st6a" data-t="The world never stands still."></div>
+    <div class="line" data-k="st6b" data-t="We *adapt* to survive."></div>
+  </div>
+  <div class="stm low mid" data-k="st7" data-t="What worked yesterday|may not work tomorrow."></div>
+  <div class="stm low mid" data-k="st8" data-t="When the world changes,|we must change how we work."></div>
+  <div class="stm low">
+    <div class="line" data-k="st9a" data-t="Don't hold on to the old way."></div>
+    <div class="line" data-k="st9b" data-t="Learn a *better* *way.*"></div>
+  </div>
+
+  <div class="stm low mid" data-k="st10" data-t="What if you had access to|extraordinary power?"></div>
+  <div class="stm low mid" data-k="st11" data-t="Power without understanding|can become a limitation."></div>
+  <div class="stm low mid">
+    <div class="line" data-k="st12a" data-t="AI is a powerful tool."></div>
+    <div class="line" data-k="st12b" data-t="But the tool is not the *strategy.*"></div>
+  </div>
+  <div class="stm low">
+    <div class="line" data-k="st13a" data-t="Don't just use the power."></div>
+    <div class="line" data-k="st13b" data-t="Learn to *direct* *it.*"></div>
+  </div>
+  <div class="stm low mid" data-k="st14" data-t="Don't compete with AI at everything it does well.|Learn to *do* *more* *with* *it.*"></div>
+
   <div id="hint">Click or press → to begin</div>
   <div id="hud"></div>
   <div id="help" hidden>
     <b>→ / Space / Click</b> next reveal<br>
     <b>← / Right-click</b> previous reveal<br>
-    <b>1 · 2 · 3</b> jump to a slide<br>
+    <b>1 – 5</b> jump to a slide<br>
     <b>Home</b> back to black<br>
     <b>F</b> fullscreen &nbsp; <b>M</b> sound on/off<br>
     <b>H</b> progress bar &nbsp; <b>?</b> this help
@@ -419,6 +452,69 @@ const cons3 = [];
   cons3.push({ t: t1, key: 'cons2', w: [.6, 1] }, { t: t2, key: 'cons2', w: [.8, 1] });
 }
 
+/* ---------- Slide 4: the moving ground (world x ≈ 1180–2300) ---------- */
+const T0 = 1180, T1 = 2320, TXE = 2180, TBASE = 20;
+let wt = 0, ghostWT = null, ghostAmp = 1;
+const taper = x => { const k = clamp((x - T0) / 170); return k * k * (3 - 2 * k); };
+const surf = (x, t, amp, j = 0) => TBASE + j * 26 + taper(x) * amp * (1 - j * .12) *
+  (28 * Math.sin(x * .011 + t * .9 + j * .3) + 16 * Math.sin(x * .023 - t * .6 + 1.3 + j * .2) + 8 * Math.sin(x * .047 + t * 1.7));
+const jit = x => taper(x) * (1.1 * Math.sin(x * .31) + .6 * Math.sin(x * .73));
+const pathY = (x, t, amp) => surf(x, t, amp) - 16 + jit(x);
+const gTerr = el('g', { mask: 'url(#terrMask)' }, cam);
+const contours = [0, 1, 2, 3, 4].map(j => el('path', { class: j ? 'cons' : 'hand-tex' }, gTerr));
+const linkL = H([[781, 40], [850, 62], [930, 52], [1020, 24], [1110, 8], [T0, 4]], 41, 1.2);
+const linkEl = el('path', { class: 'hand' }, cam);
+const ghostEl = el('path', { class: 'cons' }, cam);
+const ghostLbl = txt(cam, 1900, 0, 'YESTERDAY', 'mono p', 'middle');
+const adaptEl = el('path', { class: 'hand' }, cam);
+const betterEl = el('path', { class: 'hand' }, cam);
+const gWalker = el('g', {}, cam); el('circle', { class: 'head', cx: 0, cy: 0, r: 4.6 }, gWalker);
+const gBetterHead = el('g', {}, cam); el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 4.2 }, gBetterHead);
+const BETTER = [[2296, -64], [2440, -150], [2600, -168], [2720, -70], [2780, 120]];
+
+/* ---------- Slide 5: the power (world x ≈ 2600–3560) ---------- */
+const PX = 3000, PY = -30, S5 = [2780, 120];
+const spiralL = new Line([S5, [lerp(S5[0], PX, .5), lerp(S5[1], PY, .5)], [PX, PY],
+  ...Array.from({ length: 360 }, (_, i) => { const u = (i + 1) / 360, th = -Math.PI / 2 + 6 * Math.PI * u, r = 150 * u; return [PX + r * Math.cos(th), PY + r * Math.sin(th)]; })]);
+const gPow = el('g', {}, cam);
+const powGlow = el('circle', { class: 'fill-lime', cx: PX, cy: PY, r: 60, filter: 'url(#glow)' }, gPow);
+const spiralEl = el('path', { class: 'guide', style: 'opacity:.9' }, gPow);
+const rays = Array.from({ length: 90 }, (_, i) => {
+  const r = Math.sin(i * 91.7) * 4375.85, len = 50 + (r - Math.floor(r)) * 110;
+  return { a: TAU * i / 90, len, ph: i * 1.7, e: el('line', { class: 'guide' }, gPow) };
+});
+const gSpark = el('g', {}, cam); el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 4.2 }, gSpark);
+const cageEl = el('path', { class: 'perfect' }, cam);
+const gTool = el('g', {}, cam);
+const toolTicks = Array.from({ length: 48 }, () => el('line', { class: 'tick' }, gTool));
+const toolGuides = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(d => ({ d, e: el('line', { class: 'guide' }, gTool) }));
+const toolTrail = el('path', { class: 'trail', filter: 'url(#glow)' }, gTool);
+const toolArm = el('line', { class: 'guide', style: 'opacity:.8' }, gTool);
+const gToolPt = el('g', {}, gTool); el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 3.6 }, gToolPt);
+const revT = txt(gTool, PX + 14, PY - 14, 'rev 0000', 'mono');
+const humanL = H([S5, [2836, 98], [2894, 46], [2950, 4], [PX, PY]], 51, 1.8);
+const humanEl = el('path', { class: 'hand' }, cam);
+const PLAN = [[PX, PY], [3110, -90], [3220, -70], [3300, -150], [3420, -172], [3512, -112]];
+const sketchL = new Line(tremor(smooth(PLAN, 16), 3.2, 61));
+const traceL = new Line(smooth(PLAN, 16));
+const sketchEl = el('path', { class: 'hand' }, cam);
+const PT = PLAN[PLAN.length - 1];
+const crossA = new Line(tremor(smooth([[PT[0] - 12, PT[1] - 12], [PT[0] + 13, PT[1] + 11]], 6), 1, 3));
+const crossB = new Line(tremor(smooth([[PT[0] + 12, PT[1] - 13], [PT[0] - 11, PT[1] + 12]], 6), 1, 5));
+const crossAEl = el('path', { class: 'hand' }, cam), crossBEl = el('path', { class: 'hand' }, cam);
+const traceEl = el('path', { class: 'beam' }, cam);
+const traceGlow = el('path', { class: 'trail', filter: 'url(#glow)' }, cam);
+const hitRing = el('circle', { class: 'ring', cx: PT[0], cy: PT[1], r: 14 }, cam);
+const hitPulse = el('circle', { class: 'ring', cx: PT[0], cy: PT[1], r: 14 }, cam);
+const ARM_AIM = Math.atan2(PLAN[1][1] - PY, PLAN[1][0] - PX);
+let armA = -Math.PI / 2;
+function circD(cx, cy, r, a0, sweep, n = 96) {
+  if (sweep <= .001) return '';
+  let d = '';
+  for (let i = 0; i <= n; i++) { const a = a0 + sweep * i / n; d += (i ? 'L' : 'M') + f2(cx + r * Math.cos(a)) + ' ' + f2(cy + r * Math.sin(a)); }
+  return d;
+}
+
 /* ================================================================
    Steps: each click sets new targets; a key may take a sequence of segments.
    ================================================================ */
@@ -428,6 +524,9 @@ const D = {
   cur: 0, cpos: 0, hc: 0, cleave: 0, ann: 0, annO: 1, isp: 0, marks: 0, hcO: 1,
   ai: 0, gd: 0, pc: 0, close: 0, lblH: 0, lblA: 0, gv: 0, st1a: 0, st1b: 0, shape: 0, drift: 0, st2: 0, qm2: 0, ctr: 0,
   rowO: 1, hero: 0, ring: 0, stem: 0, tree: 0, bridge: 0, river: 0, cons1: 0, cons2: 0, consO: 1, st3: 0, st4: 0, st5: 0,
+  link: 0, terr: 0, tamp: 1, tspd: 1, ap: 0, ghost: 0, ghostX: 0, better: 0,
+  spark: 0, spiral: 0, rays: 0, cageD: 0, cr: 310, pw: 1, tool: 0, spin: 0, ctr2: 0, humanIn: 0, aim: 0, sketch: 0, trace: 0, impact: 0,
+  st6a: 0, st6b: 0, st7: 0, st8: 0, st9a: 0, st9b: 0, st10: 0, st11: 0, st12a: 0, st12b: 0, st13a: 0, st13b: 0, st14: 0,
 };
 const STEPS = [
   { s: 1, n: 'Black' },
@@ -479,9 +578,51 @@ const STEPS = [
     consO: { to: 0, dur: 1.8, ease: 'linear' }, fine: { to: .35, dur: 2 }, grid: { to: .28, dur: 2 },
     st4: { to: 0, dur: .6 }, st5: { to: 1, dur: 2.6, delay: 1.1, ease: 'linear' }, corner: { to: 0, dur: 1.2 }, qo: { to: 0, dur: 1.2 },
     camZ: { to: 1.85, dur: 5, ease: 'inOutSine' } },
+
+  { s: 4, n: 'The world never stands still',
+    st5: { to: 0, dur: .6 }, camX: { to: 1720, dur: 3.4 }, camY: { to: 80, dur: 3.4 }, camZ: { to: 1, dur: 3.4 },
+    link: { to: 1, dur: 2.4, delay: .4, ease: 'inOutSine' }, terr: { to: 1, dur: 2.6, delay: 1.3, ease: 'out' },
+    fine: { to: 0, dur: 2 }, grid: { to: 1, dur: 2.4 }, corner: { to: 1, dur: 1.2, delay: 1.2 }, qo: { to: 1, dur: 1.2, delay: 1.2 },
+    st6a: { to: 1, dur: 1.5, delay: 3, ease: 'linear' } },
+  { s: 4, n: 'We adapt to survive', fx: [['pen', 0], ['scratch', .1, 3.5]],
+    ap: { to: 1, dur: 3.6, ease: 'inOutSine' }, st6b: { to: 1, dur: 1.2, delay: 1.2, ease: 'linear' } },
+  { s: 4, n: 'What worked yesterday…',
+    st6a: { to: 0, dur: .5 }, st6b: { to: 0, dur: .5 }, ghost: { to: 1, dur: .8 }, st7: { to: 1, dur: 1.9, delay: .6, ease: 'linear' } },
+  { s: 4, n: 'When the world changes…',
+    st7: { to: 0, dur: .5 }, tamp: { to: 2.1, dur: 2.8 }, tspd: { to: 2.3, dur: 2 }, st8: { to: 1, dur: 2.1, delay: .8, ease: 'linear' } },
+  { s: 4, n: "Don't hold on to the old way",
+    st8: { to: 0, dur: .5 }, ghostX: { to: 1, dur: 2.4, ease: 'inOutSine' }, tspd: { to: 1.3, dur: 2 },
+    st9a: { to: 1, dur: 1.5, delay: .5, ease: 'linear' } },
+  { s: 4, n: 'Learn a better way', fx: [['scratch', .2, 3]],
+    better: { to: 1, dur: 3, delay: .2, ease: 'inOutSine' }, st9b: { to: 1, dur: 1.2, delay: .7, ease: 'linear' },
+    camX: { to: 1960, dur: 3.4, ease: 'inOutSine' }, camY: { to: 60, dur: 3.4, ease: 'inOutSine' }, camZ: { to: .92, dur: 3.4, ease: 'inOutSine' } },
+
+  { s: 5, n: 'Extraordinary power?', fx: [['tone', 2.2]],
+    st9a: { to: 0, dur: .5 }, st9b: { to: 0, dur: .5 }, camX: { to: PX, dur: 3 }, camY: { to: 40, dur: 3 }, camZ: { to: 1.1, dur: 3 },
+    spark: { to: 1, dur: .6, delay: 1.9 }, spiral: { to: 1, dur: 2.6, delay: 2.1, ease: 'inOutSine' }, rays: { to: 1, dur: 2.4, delay: 3.2, ease: 'out' },
+    tamp: { to: 1, dur: 3 }, st10: { to: 1, dur: 2, delay: 3.6, ease: 'linear' } },
+  { s: 5, n: 'Power without understanding',
+    st10: { to: 0, dur: .5 }, cageD: { to: 1, dur: 1.4 }, cr: { to: 46, dur: 2.2, delay: 1.5 },
+    st11: { to: 1, dur: 2, delay: 2.2, ease: 'linear' } },
+  { s: 5, n: 'AI is a powerful tool',
+    st11: { to: 0, dur: .5 }, cr: { to: 150, dur: 1.6, ease: 'out' }, pw: { to: 0, dur: 1.2 }, tool: { to: 1, dur: 1.8, delay: .6, ease: 'linear' },
+    st12a: { to: 1, dur: 1.2, delay: 1.4, ease: 'linear' } },
+  { s: 5, n: 'The tool is not the strategy',
+    spin: { to: 1, dur: 1.6, ease: 'inOutSine' }, ctr2: { to: 1, dur: .6, delay: .8 }, st12b: { to: 1, dur: 1.6, delay: 1, ease: 'linear' } },
+  { s: 5, n: "Don't just use the power", fx: [['scratch', .6, 2.2]],
+    st12a: { to: 0, dur: .5 }, st12b: { to: 0, dur: .5 }, spin: { to: 0, dur: 2.2, ease: 'out' }, ctr2: { to: 0, dur: .6, delay: 1.6 },
+    humanIn: { to: 1, dur: 2.2, delay: .6, ease: 'inOutSine' }, st13a: { to: 1, dur: 1.4, delay: 1.2, ease: 'linear' } },
+  { s: 5, n: 'Learn to direct it', fx: [['pen', .6], ['scratch', .6, 2], ['tone', 2.8]],
+    aim: { to: 1, dur: 1 }, sketch: { to: 1, dur: 2, delay: .6, ease: 'inOutSine' }, trace: { to: 1, dur: 1.7, delay: 2.8 },
+    impact: { to: 1, dur: 1.6, delay: 4.5, ease: 'out' }, camX: { to: 3220, dur: 3.4, ease: 'inOutSine' }, camZ: { to: 1, dur: 3.4, ease: 'inOutSine' },
+    st13b: { to: 1, dur: 1.2, delay: 1, ease: 'linear' } },
+  { s: 5, n: 'Do more with it',
+    st13a: { to: 0, dur: .6 }, st13b: { to: 0, dur: .6 }, camX: { to: 1680, dur: 4.4 }, camY: { to: 425, dur: 4.4 }, camZ: { to: .4, dur: 4.4 },
+    hcO: { to: .6, dur: 2, delay: 1.4 }, grid: { to: .5, dur: 2 }, corner: { to: 0, dur: 1.2 }, qo: { to: 0, dur: 1.2 },
+    st14: { to: 1, dur: 3, delay: 2.6, ease: 'linear' } },
 ];
 const LAST = STEPS.length - 1;
-const SLIDE_START = { 1: 1, 2: 6, 3: 12 };
+const SLIDE_START = { 1: 1, 2: 6, 3: 12, 4: 17, 5: 23 };
 const META = new Set(['s', 'n', 'fx']);
 const norm = v => typeof v === 'number' ? [{ to: v }] : Array.isArray(v) ? v : [v];
 function targetAt(n) {
@@ -568,7 +709,7 @@ function jump(n) {
   for (const k in TR) delete TR[k];
   Object.assign(S, targetAt(n)); cur = n; afterNav();
 }
-const CHAP = { 1: '01 · The human circle', 2: '02 · AI draws it perfectly', 3: '03 · Beyond perfection' };
+const CHAP = { 1: '01 · The human circle', 2: '02 · AI draws it perfectly', 3: '03 · Beyond perfection', 4: '04 · Adapt to survive', 5: '05 · Learn to direct the power' };
 let chapShown = 1;
 function afterNav() {
   try { history.replaceState(null, '', '#step-' + cur); } catch (e) {}
@@ -633,7 +774,7 @@ function renderType() {
   qEl.style.filter = q < .99 ? `blur(${f2((1 - q) * 10)}px)` : 'none';
   $('#corner').style.opacity = S.corner * .9;
   $('#hint').style.opacity = S.hint * .6;
-  $('#scrim').style.opacity = Math.max(S.st3, S.st4, S.st5, S.st1a * .6);
+  $('#scrim').style.opacity = Math.max(S.st3, S.st4, S.st5, S.st1a * .6, S.st6a, S.st7, S.st8, S.st9a, S.st10, S.st11, S.st12a, S.st13a, S.st14);
 }
 
 /* ================================================================
@@ -824,6 +965,100 @@ function renderWorld(dt) {
     if (c.e) { c.e.setAttribute('d', c.l.d(0, E.out(p))); c.e.style.opacity = vis * .9; }
     else c.t.style.opacity = p * vis;
   });
+
+  // slide 4: the ground keeps moving; the path keeps adapting
+  if (S.terr > 0) wt += dt * .6 * S.tspd;
+  show(gTerr, S.terr > 0 ? 1 : 0);
+  if (S.terr > 0) {
+    const xr = lerp(T0, T1, S.terr);
+    contours.forEach((c, j) => {
+      let d = '';
+      for (let x = T0; x <= xr; x += 8) d += (x === T0 ? 'M' : 'L') + f2(x) + ' ' + f2(surf(x, wt, S.tamp, j));
+      c.setAttribute('d', d);
+      c.style.opacity = j ? .9 - j * .14 : .55;
+    });
+  }
+  linkEl.setAttribute('d', linkL.d(0, E.inOutSine(S.link)));
+  const hx = lerp(T0, TXE, S.ap);
+  let ad = '';
+  if (S.ap > 0) { for (let x = T0; x < hx; x += 6) ad += (ad ? 'L' : 'M') + f2(x) + ' ' + f2(pathY(x, wt, S.tamp)); ad += 'L' + f2(hx) + ' ' + f2(pathY(hx, wt, S.tamp)); }
+  adaptEl.setAttribute('d', ad);
+  const hy = pathY(hx, wt, S.tamp);
+  gWalker.setAttribute('transform', `translate(${f2(hx)} ${f2(hy)}) scale(${inv.toFixed(4)})`);
+  show(gWalker, S.ap > 0 && S.better < .02 ? 1 : 0);
+  if (S.ghost > 0 && ghostWT === null) { ghostWT = wt; ghostAmp = S.tamp; }
+  if (S.ghost <= 0) ghostWT = null;
+  const go_ = S.ghost * (1 - S.ghostX);
+  show(ghostEl, go_ > .001 ? go_ * .8 : 0); show(ghostLbl, go_ > .001 ? go_ : 0);
+  if (go_ > .001) {
+    let gd = '';
+    for (let x = T0; x <= TXE; x += 6) gd += (x === T0 ? 'M' : 'L') + f2(x) + ' ' + f2(pathY(x, ghostWT, ghostAmp));
+    ghostEl.setAttribute('d', gd);
+    const u = Math.max(.7, base);
+    ghostEl.style.strokeDasharray = `${f2(5 * u * (1 - S.ghostX * .6))}px ${f2((5 + 40 * S.ghostX) * u)}px`;
+    ghostLbl.setAttribute('y', f2(pathY(1900, ghostWT, ghostAmp) - 24));
+  }
+  if (S.better > 0) {
+    const bl = new Line(tremor(smooth([[hx, hy], ...BETTER], 14), 1.4, 71));
+    betterEl.setAttribute('d', bl.d(0, S.better));
+    const bh = bl.at(S.better);
+    gBetterHead.setAttribute('transform', `translate(${f2(bh[0])} ${f2(bh[1])}) scale(${inv.toFixed(4)})`);
+  } else betterEl.setAttribute('d', '');
+  show(gBetterHead, S.better > 0 && S.spiral <= 0 ? 1 : 0);
+
+  // slide 5: the power, the cage, the tool, the direction
+  gSpark.setAttribute('transform', `translate(${S5[0]} ${S5[1]}) scale(${inv.toFixed(4)})`);
+  show(gSpark, S.spark * S.pw);
+  const cr = S.cr, ps = Math.min(1, cr / 316);
+  show(gPow, (S.spiral > 0 ? 1 : 0) * S.pw);
+  if (S.spiral > 0) {
+    gPow.setAttribute('transform', `translate(${PX} ${PY}) scale(${ps.toFixed(4)}) translate(${-PX} ${-PY})`);
+    spiralEl.setAttribute('d', spiralL.d(0, S.spiral));
+    const now = performance.now() / 1000;
+    rays.forEach((r, i) => {
+      const g = E.out(seg(S.rays, (i % 9) / 9 * .5, (i % 9) / 9 * .5 + .5));
+      const L = (r.len + 12 * Math.sin(now * 2.3 + r.ph)) * g, c = Math.cos(r.a), sn = Math.sin(r.a);
+      r.e.setAttribute('x1', f2(PX + 170 * c)); r.e.setAttribute('y1', f2(PY + 170 * sn));
+      r.e.setAttribute('x2', f2(PX + (170 + L) * c)); r.e.setAttribute('y2', f2(PY + (170 + L) * sn));
+      r.e.style.opacity = g > 0 ? .5 : 0;
+    });
+    powGlow.style.opacity = (.12 + .3 * (1 - ps)) * Math.min(1, S.spiral * 2);
+  }
+  cageEl.setAttribute('d', circD(PX, PY, cr, -Math.PI / 2, TAU * E.inOut(S.cageD), 160));
+  armA += dt * S.spin * TAU * .85;
+  let aw = ((armA - ARM_AIM) % TAU + TAU) % TAU; if (aw > Math.PI) aw -= TAU;
+  const armShown = ARM_AIM + aw * (1 - E.inOut(S.aim));
+  show(gTool, S.tool > 0 ? 1 : 0);
+  if (S.tool > 0) {
+    toolTicks.forEach((t, i) => {
+      const a = -Math.PI / 2 + TAU * i / 48, r0 = cr + (i % 4 ? 8 : 4), r1 = cr + 16;
+      t.setAttribute('x1', f2(PX + r0 * Math.cos(a))); t.setAttribute('y1', f2(PY + r0 * Math.sin(a)));
+      t.setAttribute('x2', f2(PX + r1 * Math.cos(a))); t.setAttribute('y2', f2(PY + r1 * Math.sin(a)));
+      t.style.opacity = .32 * seg(S.tool, i / 48 * .6, i / 48 * .6 + .4);
+    });
+    toolGuides.forEach((g, i) => {
+      const k = E.out(seg(S.tool, .2 + i * .08, .7 + i * .08)), L = (cr + 70) * k;
+      g.e.setAttribute('x1', PX); g.e.setAttribute('y1', PY);
+      g.e.setAttribute('x2', f2(PX + g.d[0] * L)); g.e.setAttribute('y2', f2(PY + g.d[1] * L));
+    });
+    const ax = PX + cr * Math.cos(armShown), ay = PY + cr * Math.sin(armShown);
+    toolArm.setAttribute('x1', PX); toolArm.setAttribute('y1', PY); toolArm.setAttribute('x2', f2(ax)); toolArm.setAttribute('y2', f2(ay));
+    toolArm.style.opacity = seg(S.tool, .5, 1) * .8;
+    toolTrail.setAttribute('d', S.spin > .02 ? circD(PX, PY, cr, armShown - .9 * S.spin, .9 * S.spin, 40) : '');
+    toolTrail.style.opacity = .7;
+    gToolPt.setAttribute('transform', `translate(${PX} ${PY}) scale(${inv.toFixed(4)})`);
+    revT.textContent = 'rev ' + String(Math.max(0, Math.floor((armA + Math.PI / 2) / TAU))).padStart(4, '0');
+    revT.style.opacity = S.ctr2 * .85;
+  }
+  humanEl.setAttribute('d', humanL.d(0, E.inOutSine(S.humanIn)));
+  sketchEl.setAttribute('d', sketchL.d(0, S.sketch));
+  crossAEl.setAttribute('d', crossA.d(0, seg(S.sketch, .9, .95)));
+  crossBEl.setAttribute('d', crossB.d(0, seg(S.sketch, .95, 1)));
+  traceEl.setAttribute('d', traceL.d(0, S.trace));
+  traceGlow.setAttribute('d', S.trace > 0 && S.trace < 1 ? traceL.d(Math.max(0, S.trace - .1), S.trace) : '');
+  show(hitRing, S.impact > 0 ? 1 : 0);
+  show(hitPulse, S.impact > 0 && S.impact < 1 ? 1 - S.impact : 0);
+  hitPulse.setAttribute('r', 14 + 70 * S.impact);
 }
 
 /* ================================================================
@@ -833,7 +1068,7 @@ const hud = $('#hud');
 let hudPinned = false, hudTimer = 0;
 function renderHud() {
   let html = `<span>${String(cur).padStart(2, '0')} / ${LAST}</span>`;
-  for (const s of [1, 2, 3]) {
+  for (const s of [1, 2, 3, 4, 5]) {
     html += '<span class="grp">';
     STEPS.forEach((st, i) => { if (i && st.s === s) html += `<i class="${i === cur ? 'now' : i < cur ? 'done' : ''}" title="${st.n}"></i>`; });
     html += '</span>';
@@ -852,7 +1087,7 @@ addEventListener('keydown', e => {
   else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace', 'p', 'P'].includes(k)) { e.preventDefault(); go(cur - 1); }
   else if (k === 'Home') jump(0);
   else if (k === 'End') jump(LAST);
-  else if (k === '1' || k === '2' || k === '3') jump(SLIDE_START[k]);
+  else if (SLIDE_START[k]) jump(SLIDE_START[k]);
   else if (k === 'f' || k === 'F') { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); } catch (_) {} }
   else if (k === 'm' || k === 'M') muted = !muted;
   else if (k === 'h' || k === 'H') { hudPinned = !hudPinned; hud.classList.toggle('on', hudPinned); }
