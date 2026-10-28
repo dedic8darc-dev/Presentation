@@ -197,6 +197,7 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow
     <div class="line" data-k="st35c" data-t="You don't need to wait until graduation."></div>
   </div>
   <div class="stm low big" data-k="st36" data-t="Start with what you have.|*Build* *what* *matters.*"></div>
+  <div class="stm low big" data-k="st37" data-t="Thank *you.*"></div>
 
   <div id="hint">Click or press → to begin</div>
   <div id="hud"></div>
@@ -993,6 +994,36 @@ const beyond17 = new Line(tremor(smooth([[FC[0] + 118, FC[1] + 20], [17470, -190
 const beyond17El = el('path', { class: 'hand' }, cam);
 const fin17dot = el('circle', { class: 'fill-lime', cx: 17820, cy: -170, r: 6 }, cam);
 
+/* Slide 18 — thank you: the human line and the AI line close the circle together */
+const TC = [18600, -150], TR18 = 214;
+const tkLink = new Line(tremor(smooth([[17820, -170], [17990, -122], [18170, -200], [18300, -158], [TC[0] - TR18, TC[1]]], 14), 1.6, 211));
+const tkLinkEl = el('path', { class: 'hand' }, cam);
+const tkHand = new Line(Array.from({ length: 121 }, (_, i) => { const u = i / 120, a = Math.PI + Math.PI * u, r = TR18 + 4 * Math.sin(a * 5 + 1) * Math.sin(Math.PI * u); return [TC[0] + r * Math.cos(a), TC[1] + r * Math.sin(a)]; }));
+const tkAI = new Line(Array.from({ length: 121 }, (_, i) => { const a = Math.PI - Math.PI * i / 120; return [TC[0] + TR18 * Math.cos(a), TC[1] + TR18 * Math.sin(a)]; }));
+const tkHandEl = el('path', { class: 'hand' }, cam);
+const tkAIEl = el('path', { class: 'beam' }, cam);
+const tkAIGlow = el('path', { class: 'trail', filter: 'url(#glow)' }, cam);
+const tkHeads = [0, 1].map(i => { const g = el('g', {}, cam); el('circle', { class: i ? 'fill-lime' : 'head', cx: 0, cy: 0, r: 4 }, g); return g; });
+const tkFlash = el('circle', { class: 'ring', cx: TC[0] + TR18, cy: TC[1], r: 6 }, cam);
+const tkRead = txt(cam, TC[0] + TR18 + 16, TC[1] + 4, 'CLOSED  Δ 0.000', 'mono', 'start');
+const gTk = el('g', {}, cam);
+const tkTicks = Array.from({ length: 60 }, (_, i) => el('line', { class: 'tick', x1: 0, y1: -(TR18 + (i % 5 ? 12 : 8)), x2: 0, y2: -(TR18 + 20), transform: `rotate(${i * 6})` }, gTk));
+const tkOrbit = el('circle', { class: 'fill-lime', r: 5 }, cam);
+const TK_INFO = [
+  [TC[1] - 64, 'SHAHABAS', 'lbl', 40, [0, .3]],
+  [TC[1] - 30, 'BUSINESS GROWTH & TECHNOLOGY CONSULTANT', 'mono p', 12, [.15, .45]],
+  [TC[1] + 6, 'DEDICATED BEING', 'lbl qmark', 18, [.3, .6]],
+  [TC[1] + 56, '62383 60240', 'mono pp', 17, [.5, .8]],
+  [TC[1] + 84, 'shahabas@dedicatedbeing.com', 'mono', 17, [.6, .9]],
+].map(([y, t, cls, size, win]) => {
+  const e = txt(cam, TC[0], y, t, cls, 'middle'); e.style.fontSize = size + 'px';
+  if (t.includes('@')) e.style.letterSpacing = '.04em';
+  if (cls === 'mono pp') e.style.fill = 'var(--paper)';
+  return { e, win };
+});
+const tkRule = new Line([[TC[0] - 90, TC[1] + 28], [TC[0] + 90, TC[1] + 28]]);
+const tkRuleEl = el('path', { class: 'cons' }, cam);
+
 /* Speaker notes (press S) */
 const N6 = 'Ask: “Who was that friend you called to design the front page of your school assignments or projects?” Then share how you were the person people called for photos, videos, logos and other creative work.';
 const N7 = 'Being the go-to person is great in college. But what happens when college ends? The problem isn\'t being that person. The question is whether you keep growing beyond that role.';
@@ -1008,6 +1039,7 @@ const N14 = 'Treat this as a perspective, not a prediction. AI can help you rese
 const N15 = 'You already spend hours online. What if some of that time went into building something? Being a creator does not mean becoming an influencer. It means producing something useful instead of only consuming. A skill can become a service, a project a product, an idea a community.';
 const N16n = 'Bring the whole talk together. Create something useful: the human circle. Use AI to increase your leverage: the precise circle. Use marketing to reach people: the audience. You sit in the middle, connecting all three. Keep learning, keep building.';
 const N17 = 'Close. You do not need to know everything, a big budget, or to wait until graduation. Start with what you have. Build what matters. Leave the final line on screen.';
+const N18 = 'Thank the audience. Leave your contact details on screen while you take questions.';
 const N11 = 'Bring it back to the students. They don\'t need to become AI experts overnight. Start with the skills you already have, use AI to explore possibilities, apply your own judgement, and work towards solving meaningful problems.';
 
 /* ================================================================
@@ -1029,6 +1061,7 @@ const D = {
   hd14: 0, bub14: 0, r14: 0, b14: 0, t14: 0, st14l: 0, ph15: 0, plus15: 0, q1: 0, q2: 0, q3: 0, n1: 0, n2: 0, n3: 0, lk16: 0, g17: 0, fin17: 0, bey17: 0,
   st24a: 0, st24b: 0, st25a: 0, st25b: 0, st26a: 0, st26b: 0, st27a: 0, st27b: 0, st28: 0, st29: 0, st30: 0, st31a: 0, st31b: 0,
   st32a: 0, st32b: 0, st32c: 0, st33a: 0, st33b: 0, st33c: 0, st34: 0, st35a: 0, st35b: 0, st35c: 0, st36: 0,
+  tkl: 0, tk: 0, tkc: 0, tki: 0, st37: 0,
   st13a: 0, st13b: 0, st13c: 0, st14: 0, st15: 0, st16: 0, st17a: 0, st17b: 0, st17c: 0, st18: 0, st19: 0, st20: 0, st21: 0, st22: 0, st23: 0,
 };
 const STEPS = [
@@ -1223,6 +1256,12 @@ const STEPS = [
     fin17: { to: 1, dur: 2.6, delay: .4, ease: 'linear' }, bey17: { to: 1, dur: 1.8, delay: 3, ease: 'linear' },
     corner: { to: 0, dur: 1.2 }, qo: { to: 0, dur: 1.2 }, st36: { to: 1, dur: 2.2, delay: 1.4, ease: 'linear' } },
 
+  { s: 18, n: 'Thank you', note: N18, fx: [['scratch', .6, 1.6], ['pen', 2.2], ['scratch', 2.3, 2.5], ['tone', 2.3], ['pen', 4.8]],
+    st36: { to: 0, dur: .6 }, camX: { to: 18600, dur: 3.4 }, camY: { to: -70, dur: 3.4 }, camZ: { to: 1.2, dur: 3.4 },
+    tkl: { to: 1, dur: 1.9, delay: .5, ease: 'inOutSine' }, tk: { to: 1, dur: 2.6, delay: 2.3, ease: 'inOut' },
+    tkc: { to: 1, dur: 1.6, delay: 4.8, ease: 'out' }, tki: { to: 1, dur: 2.6, delay: 5.2, ease: 'linear' },
+    st37: { to: 1, dur: 1.4, delay: 5.8, ease: 'linear' } },
+
 ];
 const LAST = STEPS.length - 1;
 const SLIDE_START = { 1: 1, 2: 6, 3: 12, 4: 17, 5: 22, 6: 31, 7: 35, 8: 37, 9: 40 };
@@ -1312,7 +1351,7 @@ function jump(n) {
   for (const k in TR) delete TR[k];
   Object.assign(S, targetAt(n)); cur = n; afterNav();
 }
-const CHAP = { 1: '01 · The human circle', 2: '02 · AI draws it perfectly', 3: '03 · Beyond perfection', 4: '04 · Adapt to survive', 5: '05 · The genie', 6: '06 · That one friend', 7: '07 · Behind the camera', 8: '08 · Draw it, or build with it', 9: '09 · Zaha Hadid Architects', 10: '10 · Less repetition', 11: '11 · Apply it to yourself', 12: '12 · Marketing is a superpower', 13: '13 · Marketing with ₹0', 14: '14 · AI as leverage', 15: '15 · Be a creator', 16: '16 · Three powers', 17: '17 · Start with what you have' };
+const CHAP = { 1: '01 · The human circle', 2: '02 · AI draws it perfectly', 3: '03 · Beyond perfection', 4: '04 · Adapt to survive', 5: '05 · The genie', 6: '06 · That one friend', 7: '07 · Behind the camera', 8: '08 · Draw it, or build with it', 9: '09 · Zaha Hadid Architects', 10: '10 · Less repetition', 11: '11 · Apply it to yourself', 12: '12 · Marketing is a superpower', 13: '13 · Marketing with ₹0', 14: '14 · AI as leverage', 15: '15 · Be a creator', 16: '16 · Three powers', 17: '17 · Start with what you have', 18: '18 · Thank you' };
 let chapShown = 1;
 function afterNav() {
   try { history.replaceState(null, '', '#step-' + cur); } catch (e) {}
@@ -1382,7 +1421,7 @@ function renderType() {
   qEl.style.filter = q < .99 ? `blur(${f2((1 - q) * 10)}px)` : 'none';
   $('#corner').style.opacity = S.corner * .9;
   $('#hint').style.opacity = S.hint * .6;
-  $('#scrim').style.opacity = Math.max(S.st3, S.st4, S.st5, S.st1a * .6, S.st6, S.st7, S.st8, S.st9, S.st11, S.st12, S.st13a, S.st14, S.st15, S.st17a, S.st18, S.st20, S.st22, S.st23, S.st24a, S.st25a, S.st26a, S.st27a, S.st28, S.st29, S.st30, S.st31a, S.st32a, S.st33a, S.st34, S.st35a, S.st36);
+  $('#scrim').style.opacity = Math.max(S.st3, S.st4, S.st5, S.st1a * .6, S.st6, S.st7, S.st8, S.st9, S.st11, S.st12, S.st13a, S.st14, S.st15, S.st17a, S.st18, S.st20, S.st22, S.st23, S.st24a, S.st25a, S.st26a, S.st27a, S.st28, S.st29, S.st30, S.st31a, S.st32a, S.st33a, S.st34, S.st35a, S.st36, S.st37);
 }
 
 /* ================================================================
@@ -1779,7 +1818,7 @@ function renderWorld(dt) {
 
   // ---------- slides 6–11 ----------
   journeyEl.setAttribute('d', S.jl > JL0 ? journey.d(0, clamp((S.jl - JL0) / (JL1 - JL0))) : '');
-  journeyEl.style.opacity = 1 - .85 * Math.max(S.st13a, S.st14, S.st15, S.st17a, S.st18, S.st20, S.st22, S.st23, S.st24a, S.st25a, S.st26a, S.st27a, S.st28, S.st29, S.st30, S.st31a, S.st32a, S.st33a, S.st34, S.st35a, S.st36);
+  journeyEl.style.opacity = 1 - .85 * Math.max(S.st13a, S.st14, S.st15, S.st17a, S.st18, S.st20, S.st22, S.st23, S.st24a, S.st25a, S.st26a, S.st27a, S.st28, S.st29, S.st30, S.st31a, S.st32a, S.st33a, S.st34, S.st35a, S.st36, S.st37);
   const spot = x => S.camX < 4400 ? 1 : 1 - .85 * E.inOutSine(clamp((Math.abs(x - S.camX) - 470) / 120));
   for (const o of PIECES) {
     const p = seg(S[o.key], o.win[0], o.win[1]);
@@ -1840,6 +1879,21 @@ function renderWorld(dt) {
   fin17El.setAttribute('d', fin17.d(0, penF(S.fin17)));
   beyond17El.setAttribute('d', beyond17.d(0, E.inOutSine(S.bey17)));
   fin17dot.style.opacity = seg(S.bey17, .95, 1);
+  // slide 18 thank you
+  tkLinkEl.setAttribute('d', tkLink.d(0, S.tkl));
+  tkHandEl.setAttribute('d', tkHand.d(0, S.tk));
+  tkAIEl.setAttribute('d', tkAI.d(0, S.tk));
+  tkAIGlow.setAttribute('d', S.tk > 0 && S.tk < 1 ? tkAI.d(Math.max(0, S.tk - .12), S.tk) : '');
+  [tkHand, tkAI].forEach((l, i) => { const h = l.at(S.tk); tkHeads[i].setAttribute('transform', `translate(${f2(h[0])} ${f2(h[1])}) scale(${inv.toFixed(4)})`); show(tkHeads[i], S.tk > 0 && S.tk < 1 ? 1 : 0); });
+  tkFlash.setAttribute('r', f2(6 + 120 * S.tkc)); tkFlash.style.opacity = S.tkc > 0 && S.tkc < 1 ? 1 - S.tkc : 0;
+  tkRead.style.opacity = seg(S.tkc, .1, .3) * (1 - seg(S.tki, .2, .5)) * .9;
+  gTk.setAttribute('transform', `translate(${TC[0]} ${TC[1]}) rotate(${f2(now * 4 % 360)})`);
+  tkTicks.forEach((t, i) => t.style.opacity = .3 * seg(S.tki, i / 60 * .6, i / 60 * .6 + .3));
+  const oa = now * .5;
+  tkOrbit.setAttribute('cx', f2(TC[0] + (TR18 + 30) * Math.cos(oa))); tkOrbit.setAttribute('cy', f2(TC[1] + (TR18 + 30) * Math.sin(oa)));
+  tkOrbit.style.opacity = seg(S.tki, .8, 1);
+  TK_INFO.forEach(o => { const k = seg(S.tki, o.win[0], o.win[1]); o.e.style.opacity = k; o.e.setAttribute('transform', `translate(0 ${f2((1 - E.out(k)) * 10)})`); });
+  tkRuleEl.setAttribute('d', tkRule.d(.5 - .5 * seg(S.tki, .35, .6), .5 + .5 * seg(S.tki, .35, .6)));
 }
 
 /* ================================================================
@@ -1849,7 +1903,7 @@ const hud = $('#hud');
 let hudPinned = false, hudTimer = 0;
 function renderHud() {
   let html = `<span>${String(cur).padStart(2, '0')} / ${LAST}</span>`;
-  for (let s = 1; s <= 17; s++) {
+  for (let s = 1; s <= 18; s++) {
     html += '<span class="grp">';
     STEPS.forEach((st, i) => { if (i && st.s === s) html += `<i class="${i === cur ? 'now' : i < cur ? 'done' : ''}" title="${st.n}"></i>`; });
     html += '</span>';
