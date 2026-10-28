@@ -55,6 +55,7 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow
 .low.big{font-size:clamp(30px,5.8vw,124px)}
 .low.mid{font-size:clamp(22px,3.4vw,74px)}
 #world .head{fill:var(--paper);stroke:none}
+#world path.cart{vector-effect:none;fill:none;stroke:currentColor;stroke-width:var(--csw,2);stroke-linecap:round;stroke-linejoin:round}
 .beam{stroke:var(--lime);stroke-width:calc(var(--u)*2.2px)}
 .side{left:60%;right:var(--gx);top:50%;transform:translateY(-50%);font-size:clamp(28px,5vw,104px)}
 .qm{display:inline-block;margin-left:-.2em;color:var(--lime);opacity:0}
@@ -111,32 +112,19 @@ html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow
     <div class="line" data-k="st1b" data-t="it can be *automated.*"></div>
   </div>
   <div class="stm low" data-k="st2" data-t="Perfect. Repeatable. Replaceable"></div>
-  <div class="stm low" data-k="st3" data-t="Perfection is not the finish line."></div>
-  <div class="stm low big" data-k="st4" data-t="Don't just be perfect.|*Be* *valuable.*"></div>
-  <div class="stm low" data-k="st5" data-t="Don't compete with AI at being perfect.|Learn to *go* *beyond* *it.*"></div>
+  <div class="stm low" data-k="st3" data-t="But what happens|*beyond* the circle?"></div>
+  <div class="stm low big" data-k="st4" data-t="The circle is only|the *beginning.*"></div>
+  <div class="stm low" data-k="st5" data-t="So what happens when|the world *changes?*"></div>
 
+  <div class="stm low" data-k="st6" data-t="The world *changes.*"></div>
+  <div class="stm low mid" data-k="st7" data-t="What worked before|may not work tomorrow."></div>
+  <div class="stm low" data-k="st8" data-t="We *adapt* to survive."></div>
   <div class="stm low">
-    <div class="line" data-k="st6a" data-t="The world never stands still."></div>
-    <div class="line" data-k="st6b" data-t="We *adapt* to survive."></div>
+    <div class="line" data-k="st9" data-t="Power alone isn't enough."></div>
+    <div class="line" data-k="st10" data-t="You need to know *how* *to* *use* *it.*"></div>
   </div>
-  <div class="stm low mid" data-k="st7" data-t="What worked yesterday|may not work tomorrow."></div>
-  <div class="stm low mid" data-k="st8" data-t="When the world changes,|we must change how we work."></div>
-  <div class="stm low">
-    <div class="line" data-k="st9a" data-t="Don't hold on to the old way."></div>
-    <div class="line" data-k="st9b" data-t="Learn a *better* *way.*"></div>
-  </div>
-
-  <div class="stm low mid" data-k="st10" data-t="What if you had access to|extraordinary power?"></div>
-  <div class="stm low mid" data-k="st11" data-t="Power without understanding|can become a limitation."></div>
-  <div class="stm low mid">
-    <div class="line" data-k="st12a" data-t="AI is a powerful tool."></div>
-    <div class="line" data-k="st12b" data-t="But the tool is not the *strategy.*"></div>
-  </div>
-  <div class="stm low">
-    <div class="line" data-k="st13a" data-t="Don't just use the power."></div>
-    <div class="line" data-k="st13b" data-t="Learn to *direct* *it.*"></div>
-  </div>
-  <div class="stm low mid" data-k="st14" data-t="Don't compete with AI at everything it does well.|Learn to *do* *more* *with* *it.*"></div>
+  <div class="stm low mid" data-k="st11" data-t="AI can give you|powerful capabilities."></div>
+  <div class="stm low mid" data-k="st12" data-t="Your job is to turn them|into *real* *impact.*"></div>
 
   <div id="hint">Click or press → to begin</div>
   <div id="hud"></div>
@@ -452,68 +440,206 @@ const cons3 = [];
   cons3.push({ t: t1, key: 'cons2', w: [.6, 1] }, { t: t2, key: 'cons2', w: [.8, 1] });
 }
 
-/* ---------- Slide 4: the moving ground (world x ≈ 1180–2300) ---------- */
-const T0 = 1180, T1 = 2320, TXE = 2180, TBASE = 20;
-let wt = 0, ghostWT = null, ghostAmp = 1;
-const taper = x => { const k = clamp((x - T0) / 170); return k * k * (3 - 2 * k); };
-const surf = (x, t, amp, j = 0) => TBASE + j * 26 + taper(x) * amp * (1 - j * .12) *
-  (28 * Math.sin(x * .011 + t * .9 + j * .3) + 16 * Math.sin(x * .023 - t * .6 + 1.3 + j * .2) + 8 * Math.sin(x * .047 + t * 1.7));
-const jit = x => taper(x) * (1.1 * Math.sin(x * .31) + .6 * Math.sin(x * .73));
-const pathY = (x, t, amp) => surf(x, t, amp) - 16 + jit(x);
-const gTerr = el('g', { mask: 'url(#terrMask)' }, cam);
-const contours = [0, 1, 2, 3, 4].map(j => el('path', { class: j ? 'cons' : 'hand-tex' }, gTerr));
-const linkL = H([[781, 40], [850, 62], [930, 52], [1020, 24], [1110, 8], [T0, 4]], 41, 1.2);
-const linkEl = el('path', { class: 'hand' }, cam);
-const ghostEl = el('path', { class: 'cons' }, cam);
-const ghostLbl = txt(cam, 1900, 0, 'YESTERDAY', 'mono p', 'middle');
-const adaptEl = el('path', { class: 'hand' }, cam);
-const betterEl = el('path', { class: 'hand' }, cam);
-const gWalker = el('g', {}, cam); el('circle', { class: 'head', cx: 0, cy: 0, r: 4.6 }, gWalker);
-const gBetterHead = el('g', {}, cam); el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 4.2 }, gBetterHead);
-const BETTER = [[2296, -64], [2440, -150], [2600, -168], [2720, -70], [2780, 120]];
-
-/* ---------- Slide 5: the power (world x ≈ 2600–3560) ---------- */
-const PX = 3000, PY = -30, S5 = [2780, 120];
-const spiralL = new Line([S5, [lerp(S5[0], PX, .5), lerp(S5[1], PY, .5)], [PX, PY],
-  ...Array.from({ length: 360 }, (_, i) => { const u = (i + 1) / 360, th = -Math.PI / 2 + 6 * Math.PI * u, r = 150 * u; return [PX + r * Math.cos(th), PY + r * Math.sin(th)]; })]);
-const gPow = el('g', {}, cam);
-const powGlow = el('circle', { class: 'fill-lime', cx: PX, cy: PY, r: 60, filter: 'url(#glow)' }, gPow);
-const spiralEl = el('path', { class: 'guide', style: 'opacity:.9' }, gPow);
-const rays = Array.from({ length: 90 }, (_, i) => {
-  const r = Math.sin(i * 91.7) * 4375.85, len = 50 + (r - Math.floor(r)) * 110;
-  return { a: TAU * i / 90, len, ph: i * 1.7, e: el('line', { class: 'guide' }, gPow) };
-});
-const gSpark = el('g', {}, cam); el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 4.2 }, gSpark);
-const cageEl = el('path', { class: 'perfect' }, cam);
-const gTool = el('g', {}, cam);
-const toolTicks = Array.from({ length: 48 }, () => el('line', { class: 'tick' }, gTool));
-const toolGuides = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(d => ({ d, e: el('line', { class: 'guide' }, gTool) }));
-const toolTrail = el('path', { class: 'trail', filter: 'url(#glow)' }, gTool);
-const toolArm = el('line', { class: 'guide', style: 'opacity:.8' }, gTool);
-const gToolPt = el('g', {}, gTool); el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 3.6 }, gToolPt);
-const revT = txt(gTool, PX + 14, PY - 14, 'rev 0000', 'mono');
-const humanL = H([S5, [2836, 98], [2894, 46], [2950, 4], [PX, PY]], 51, 1.8);
-const humanEl = el('path', { class: 'hand' }, cam);
-const PLAN = [[PX, PY], [3110, -90], [3220, -70], [3300, -150], [3420, -172], [3512, -112]];
-const sketchL = new Line(tremor(smooth(PLAN, 16), 3.2, 61));
-const traceL = new Line(smooth(PLAN, 16));
-const sketchEl = el('path', { class: 'hand' }, cam);
-const PT = PLAN[PLAN.length - 1];
-const crossA = new Line(tremor(smooth([[PT[0] - 12, PT[1] - 12], [PT[0] + 13, PT[1] + 11]], 6), 1, 3));
-const crossB = new Line(tremor(smooth([[PT[0] + 12, PT[1] - 13], [PT[0] - 11, PT[1] + 12]], 6), 1, 5));
-const crossAEl = el('path', { class: 'hand' }, cam), crossBEl = el('path', { class: 'hand' }, cam);
-const traceEl = el('path', { class: 'beam' }, cam);
-const traceGlow = el('path', { class: 'trail', filter: 'url(#glow)' }, cam);
-const hitRing = el('circle', { class: 'ring', cx: PT[0], cy: PT[1], r: 14 }, cam);
-const hitPulse = el('circle', { class: 'ring', cx: PT[0], cy: PT[1], r: 14 }, cam);
-const ARM_AIM = Math.atan2(PLAN[1][1] - PY, PLAN[1][0] - PX);
-let armA = -Math.PI / 2;
-function circD(cx, cy, r, a0, sweep, n = 96) {
+/* ---------- Line-art helpers for illustrated pieces (drawn on with pathLength dashes) ---------- */
+let Zc = 1;   // current camera zoom, so illustrated strokes keep a constant on-screen weight
+function artG(parent, color = 'var(--paper)') { const g = el('g', {}, parent); g.style.color = color; return g; }
+function art(g, d, cls = 'cart') { return el('path', { d, class: cls, pathLength: 1 }, g); }
+function drawA(e, p) {
+  if (p <= .001) { e.style.visibility = 'hidden'; return; }
+  e.style.visibility = ''; e.style.strokeDasharray = '1 1'; e.style.strokeDashoffset = (1 - clamp(p)).toFixed(4);
+}
+function placeG(g, x, y, sc, rot = 0) {
+  g.setAttribute('transform', `translate(${f2(x)} ${f2(y)}) rotate(${f2(rot)}) scale(${sc.toFixed(4)})`);
+  g.style.setProperty('--csw', (2.3 * Math.max(.7, base) / (base * Zc * sc)).toFixed(4));
+}
+function circD(cx, cy, r, a0, sweep, n = 96, ry = r, tilt = 0) {
   if (sweep <= .001) return '';
+  const ct = Math.cos(tilt), st = Math.sin(tilt);
   let d = '';
-  for (let i = 0; i <= n; i++) { const a = a0 + sweep * i / n; d += (i ? 'L' : 'M') + f2(cx + r * Math.cos(a)) + ' ' + f2(cy + r * Math.sin(a)); }
+  for (let i = 0; i <= n; i++) {
+    const a = a0 + sweep * i / n, x = r * Math.cos(a), y = ry * Math.sin(a);
+    d += (i ? 'L' : 'M') + f2(cx + x * ct - y * st) + ' ' + f2(cy + x * st + y * ct);
+  }
   return d;
 }
+const mixC = (k) => `rgb(${Math.round(lerp(239, 200, k))},${Math.round(lerp(233, 245, k))},${Math.round(lerp(220, 59, k))})`;
+
+/* ---------- Slide 4: Nokia on a moving market (world x ≈ 1180–2320) ---------- */
+const T0 = 1180, T1 = 2320, TXE = 2180, TBASE = 20, NX = 1550, SX = 1980;
+let wt = 0;
+const taper = x => { const k = clamp((x - T0) / 170); return k * k * (3 - 2 * k); };
+const gauss = (x, c, w) => Math.exp(-Math.pow((x - c) / w, 2));
+const surf = (x, t, amp, j = 0) => TBASE + j * 26 + taper(x) * (
+  -(1 - j * .1) * (S.h1 * gauss(x, NX, 125) + S.h2 * gauss(x, SX, 125)) +
+  amp * (1 - j * .12) * (28 * Math.sin(x * .011 + t * .9 + j * .3) + 16 * Math.sin(x * .023 - t * .6 + 1.3 + j * .2) + 8 * Math.sin(x * .047 + t * 1.7)));
+const jit = x => taper(x) * (1.1 * Math.sin(x * .31) + .6 * Math.sin(x * .73));
+const pathY = (x, t, amp) => surf(x, t, amp, 1) + 13 + jit(x);
+const gTerr = el('g', { mask: 'url(#terrMask)' }, cam);
+const contours = [0, 1, 2, 3, 4].map(j => el('path', { class: j ? 'cons' : 'hand-tex' }, gTerr));
+const linkL = H([[781, 40], [850, 62], [930, 72], [1020, 66], [1110, 60], [T0, TBASE + 39]], 41, 1.2);
+const linkEl = el('path', { class: 'hand' }, cam);
+const adaptEl = el('path', { class: 'hand' }, cam);
+const gWalker = el('g', {}, cam); el('circle', { class: 'head', cx: 0, cy: 0, r: 4.6 }, gWalker);
+
+// the keypad phone (local origin: bottom centre, 200 tall)
+const gPhN = artG(cam);
+let keys = '';
+for (let r = 0; r < 4; r++) for (let c = 0; c < 3; c++) {
+  const x = -22 + 22 * c, y = -80 + 18 * r;
+  keys += `M${x - 8} ${y - 4}L${x + 8} ${y - 4}Q${x + 11} ${y} ${x + 8} ${y + 4}L${x - 8} ${y + 4}Q${x - 11} ${y} ${x - 8} ${y - 4}Z`;
+}
+const phN = [
+  'M-42 -170C-42 -192 -24 -200 0 -200C24 -200 42 -192 42 -170L42 -22C42 -8 32 0 18 0L-18 0C-32 0 -42 -8 -42 -22Z',
+  'M-28 -174L28 -174L28 -124L-28 -124Z', 'M-10 -187L10 -187',
+  'M-20 -136L-6 -136L-6 -148L10 -148L10 -158M17 -140L18 -140',
+  'M-18 -106C-18 -114 18 -114 18 -106C18 -98 -18 -98 -18 -106Z', 'M-33 -106L-25 -106M25 -106L33 -106', keys, 'M-3 -10L3 -10',
+].map(d => art(gPhN, d));
+const lblN = txt(cam, 0, 0, 'NOKIA', 'mono', 'middle');
+const lblT = txt(cam, 0, 0, 'A HARD TRANSITION', 'mono p', 'middle');
+
+// the touchscreen smartphone
+const gPhS = artG(cam);
+const phS = [
+  'M-52 -192C-52 -206 -44 -212 -30 -212L30 -212C44 -212 52 -206 52 -192L52 -20C52 -6 44 0 30 0L-30 0C-44 0 -52 -6 -52 -20Z',
+  'M-44 -198L44 -198L44 -14L-44 -14Z', 'M-10 -205L10 -205',
+].map(d => art(gPhS, d));
+const appEls = [];
+for (let r = 0; r < 6; r++) for (let c = 0; c < 4; c++) {
+  const x = -30 + 20 * c, y = -180 + 26 * r;
+  appEls.push(art(gPhS, `M${x - 4} ${y - 7}L${x + 4} ${y - 7}Q${x + 7} ${y - 7} ${x + 7} ${y - 4}L${x + 7} ${y + 4}Q${x + 7} ${y + 7} ${x + 4} ${y + 7}L${x - 4} ${y + 7}Q${x - 7} ${y + 7} ${x - 7} ${y + 4}L${x - 7} ${y - 4}Q${x - 7} ${y - 7} ${x - 4} ${y - 7}Z`));
+}
+const lblS = txt(cam, 0, 0, 'TOUCHSCREEN ERA', 'mono', 'middle');
+const ECO = [['APPS', -150, -170], ['SOFTWARE', 160, -190], ['TOUCH', 175, -60], ['ECOSYSTEM', -165, -40]];
+const ecoEls = ECO.map(([t, dx, dy]) => ({ dx, dy, ln: el('line', { class: 'cons dash' }, cam), dot: el('circle', { class: 'ring', r: 4 }, cam), t: txt(cam, 0, 0, t, 'mono', dx < 0 ? 'end' : 'start') }));
+
+/* ---------- Slide 5: the lamp, the genie and Jafar (world x ≈ 2500–3600) ---------- */
+const LMX = 3080, LMY = 172;                       // main lamp: foot centre
+const SPOUT = [LMX + 128, LMY - 60];
+const GNX = 3250, GNY = -110;                   // genie chest
+const JX = 2800, JY = 172;                       // Jafar's feet
+const PLX = 2800, PLY = 184, PLS = .62;          // the lamp that traps Jafar
+const LAMP = {
+  foot: 'M-24 0C-20 -4 20 -4 24 0M-24 0C-12 4 12 4 24 0M-16 -3C-14 -8 -10 -11 -8 -13M16 -3C14 -8 10 -11 8 -13',
+  body: 'M-8 -13C-40 -14 -62 -22 -62 -36C-62 -54 -30 -62 0 -62C30 -62 56 -56 72 -46C90 -52 108 -60 124 -64C132 -66 134 -58 126 -54C110 -44 94 -34 82 -26C62 -16 34 -12 8 -13Z',
+  band: 'M-52 -40C-20 -32 30 -32 70 -42',
+  handle: 'M-60 -44C-94 -52 -100 -16 -66 -22',
+  lid: 'M-28 -62C-26 -82 26 -82 28 -62M-6 -86C-6 -94 6 -94 6 -86C6 -80 -6 -80 -6 -86',
+};
+const contL = H([[TXE, 70], [2320, 64], [2520, 38], [2740, 110], [2920, 172], [3040, 172]], 81, 1.4);
+const contEl = el('path', { class: 'hand' }, cam);
+const lampGlow = el('ellipse', { class: 'fill-lime', cx: LMX + 10, cy: LMY - 40, rx: 110, ry: 46, filter: 'url(#glow)' }, cam);
+const gLamp = artG(cam);
+const lampEls = ['foot', 'body', 'band', 'handle'].map(k => art(gLamp, LAMP[k]));
+const gLid = artG(cam);
+const lidEl = art(gLid, LAMP.lid);
+const sparkles = [[-70, -110], [150, -100], [40, -130], [-110, -60], [190, -30]].map(([dx, dy], i) =>
+  ({ x: LMX + dx, y: LMY + dy, ph: i * 1.9, e: el('path', { class: 'ann' }, cam) }));
+
+// smoke strands (world space, animated)
+const smokeEls = Array.from({ length: 4 }, (_, k) => el('path', { class: k ? 'guide' : 'trail', style: k ? '' : 'stroke-width:calc(var(--u)*1.8px)' }, cam));
+
+// the genie (lime line art; local origin at the chest)
+const gGenie = artG(cam, 'var(--lime)');
+const GENIE = [
+  'M-32 -98C-32 -120 -16 -132 0 -132C18 -132 32 -118 32 -98C32 -78 18 -64 0 -64C-18 -64 -32 -78 -32 -98Z',
+  'M-4 -132C-12 -146 0 -160 8 -152C14 -146 6 -138 0 -135M8 -152C26 -162 36 -142 22 -128',
+  'M-17 -102Q-11 -108 -5 -102M5 -102Q11 -108 17 -102', 'M-12 -84Q0 -74 12 -84', 'M-4 -65Q0 -54 4 -65',
+  'M-28 -62C-70 -58 -86 -30 -76 0C-66 30 -40 46 -20 60C-4 72 6 84 2 100M28 -62C70 -58 86 -30 76 0C66 30 44 52 30 70C18 86 -10 92 -14 112C-16 124 -4 130 6 124',
+  'M-62 24C-22 34 22 34 62 24', 'M-72 -22C-40 0 22 6 54 -12M72 -26C42 -4 -20 2 -48 -16',
+  'M40 -21L52 -23L56 -7L44 -5ZM-36 -19L-48 -21L-52 -5L-40 -3Z',
+].map(d => art(gGenie, d));
+const genieGlow = el('circle', { class: 'fill-lime', cx: GNX, cy: GNY - 30, r: 90, filter: 'url(#glow)' }, cam);
+
+// Jafar (paper line art; local origin between the feet)
+const gJ = artG(cam);
+const JAF = {
+  crown: 'M-17 -218C-16 -256 -4 -280 6 -286C10 -266 18 -246 17 -218',
+  plume: 'M6 -286C20 -296 32 -284 22 -270',
+  turban: 'M-27 -206C-32 -226 32 -226 27 -206C20 -197 -20 -197 -27 -206Z',
+  jewel: 'M-4 -211C-4 -216 4 -216 4 -211C4 -206 -4 -206 -4 -211',
+  face: 'M-20 -200C-24 -176 -18 -156 0 -146C18 -156 24 -176 20 -200',
+  goatee: 'M-6 -150C-4 -130 0 -118 5 -112C9 -106 2 -100 -2 -104',
+  collar: 'M-30 -150L-46 -178L-20 -150M30 -150L46 -178L20 -150',
+};
+const jHead = Object.values(JAF).map(d => art(gJ, d));
+const jRobe = [art(gJ, 'M-30 -148C-40 -100 -46 -40 -56 0L56 0C46 -40 40 -100 30 -148M0 -146L0 0'),
+  art(gJ, 'M-34 -146C-72 -100 -90 -40 -98 2M34 -146C72 -100 88 -40 94 2')];
+const jWaist = art(gJ, 'M-31 -128C-10 -122 10 -122 31 -128');
+const jGenieBody = art(gJ, 'M-30 -148C-62 -140 -70 -112 -60 -86C-50 -62 -26 -50 -10 -30C2 -16 4 0 -4 14M30 -148C62 -140 70 -112 60 -86C50 -62 30 -44 18 -26C8 -10 -12 0 -10 20');
+const jStaff = art(gJ, 'M-44 -150L-44 0M-44 -150C-58 -158 -54 -176 -42 -176C-30 -176 -28 -162 -38 -156');
+const FACES = {
+  neutral: 'M-17 -188L-6 -184M17 -188L6 -184M-13 -179L-8 -179M8 -179L13 -179',
+  greed: 'M-17 -191L-5 -183M17 -191L5 -183M-14 -179Q-10 -181 -6 -179M6 -179Q10 -181 14 -179',
+  triumph: 'M-17 -192L-6 -194M17 -192L6 -194M-13 -180Q-10 -184 -7 -180M7 -180Q10 -184 13 -180',
+  shock: 'M-16 -195Q-11 -199 -6 -196M16 -195Q11 -199 6 -196M-14 -180A4 4 0 1 0 -6 -180A4 4 0 1 0 -14 -180M6 -180A4 4 0 1 0 14 -180A4 4 0 1 0 6 -180',
+};
+const MOUTHS = {
+  neutral: 'M-7 -161Q0 -159 7 -161', smirk: 'M-8 -163Q3 -157 10 -165', talk: 'M-6 -163Q0 -153 6 -163Z',
+  grin: 'M-10 -164Q0 -151 10 -164Z', o: 'M-5 -158A5 6 0 1 0 5 -158A5 6 0 1 0 -5 -158',
+};
+const faceEls = Object.fromEntries(Object.entries(FACES).map(([k, d]) => [k, art(gJ, d)]));
+const mouthEls = Object.fromEntries(Object.entries(MOUTHS).map(([k, d]) => [k, art(gJ, d)]));
+const glint = [el('circle', { class: 'fill-lime', cx: -10, cy: -180, r: 1.8 }, gJ), el('circle', { class: 'fill-lime', cx: 10, cy: -180, r: 1.8 }, gJ)];
+const ARMS = {
+  neutral: [[30, -140, 46, -112, 50, -92, 52, -78], [-30, -140, -42, -116, -46, -96, -44, -84]],
+  reach: [[30, -140, 58, -142, 84, -138, 110, -132], [-30, -140, -42, -116, -46, -96, -44, -84]],
+  power: [[30, -140, 62, -150, 92, -160, 116, -176], [-30, -140, -62, -150, -92, -160, -116, -176]],
+  triumph: [[30, -140, 44, -176, 52, -208, 58, -236], [-30, -140, -44, -176, -52, -208, -58, -236]],
+  shock: [[30, -140, 50, -146, 42, -176, 24, -172], [-30, -140, -50, -146, -42, -176, -24, -172]],
+};
+const armEls = [art(gJ, ''), art(gJ, '')];
+const handEls = [art(gJ, ''), art(gJ, '')];
+const lerpArm = (a, b, k) => a.map((arm, i) => arm.map((v, j) => lerp(v, b[i][j], k)));
+const jGlow = el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 100, filter: 'url(#glow)' }, cam);
+const jTail = el('path', { class: 'trail', style: 'stroke-width:calc(var(--u)*1.8px)' }, cam);
+const swirlEls = [0, 1, 2].map(() => el('path', { class: 'guide', style: 'opacity:.8' }, cam));
+const beamEl = el('path', { class: 'beam' }, cam);
+const cuffEls = [0, 1].map(() => el('path', { class: 'ring', style: 'stroke-width:calc(var(--u)*2.4px)' }, cam));
+const cuffFlash = el('circle', { class: 'ring' }, cam);
+// speech bubble
+const gBub = el('g', {}, cam);
+const bubL = H([[2846, -152], [2840, -196], [2880, -214], [3080, -214], [3118, -196], [3114, -152], [3080, -136], [2890, -136], [2862, -138], [2836, -104], [2850, -140], [2846, -152]], 91, .8, 8);
+const bubEl = el('path', { class: 'hand' }, gBub);
+const bubT = txt(gBub, 2980, -168, 'I WISH TO BE A GENIE!', 'lbl', 'middle'); bubT.style.fontSize = '19px'; bubT.style.letterSpacing = '.08em';
+// the trap lamp
+const gPL = artG(cam);
+const plEls = ['foot', 'body', 'band', 'handle', 'lid'].map(k => art(gPL, LAMP[k]));
+const PL_SPOUT = [PLX + 128 * PLS, PLY - 60 * PLS];
+const puffEl = el('path', { class: 'guide' }, cam);
+
+// smoke → the AI circle → directed outcomes
+const AIR = 120;
+const aiCircle = new Line(circlePts(GNX, GNY, AIR, 360));
+const aiCircleEl = el('path', { class: 'perfect' }, cam);
+const gAI5 = el('g', {}, cam);
+const ai5Ticks = Array.from({ length: 48 }, (_, i) => {
+  const a = -Math.PI / 2 + TAU * i / 48, r0 = i % 4 ? AIR + 14 : AIR + 10, r1 = AIR + 22;
+  return el('line', { class: 'tick', x1: GNX + r0 * Math.cos(a), y1: GNY + r0 * Math.sin(a), x2: GNX + r1 * Math.cos(a), y2: GNY + r1 * Math.sin(a) }, gAI5);
+});
+const ai5Guides = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(d => ({ d, e: el('line', { class: 'guide', x1: GNX, y1: GNY, x2: GNX, y2: GNY }, gAI5) }));
+const gAI5pt = el('g', {}, gAI5); el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 3.6 }, gAI5pt);
+const ai5Read = txt(gAI5, GNX + 14, GNY - 14, 'r 120.000', 'mono');
+const ROUTES = [
+  [[3335, -196], [3420, -250], [3500, -230], [3566, -232]],
+  [[3368, -100], [3480, -130], [3600, -60], [3700, -40], [3764, -22]],
+  [[3330, -30], [3450, 60], [3640, 40], [3820, 110], [4020, 90], [4170, 124], [4268, 118]],
+];
+const routes = ROUTES.map((pts, i) => ({
+  sk: new Line(tremor(smooth(pts, 14), 2.6, 101 + i * 7)), tr: new Line(smooth(pts, 14)),
+  ske: el('path', { class: 'hand' }, cam), tre: el('path', { class: 'beam' }, cam),
+}));
+const OUT = [];
+{ // outcome 1: a small arch bridge
+  const a = []; for (let x = 3566; x <= 3712; x += 6) a.push([x, -232 + 58 * Math.pow((x - 3639) / 73, 2) - 58]);
+  OUT.push({ l: H(a, 111, .6, 3), w: [0, .5] }, { l: H([[3566, -232], [3712, -232]], 112, .6), w: [.2, .6] });
+  for (let i = 0; i < 5; i++) { const x = 3590 + i * 24, y = -232 + 58 * Math.pow((x - 3639) / 73, 2) - 58; OUT.push({ l: H([[x, y + 2], [x, -233]], 113 + i, .3, 3), w: [.5 + i * .06, .62 + i * .06] }); }
+}
+// outcome 2: a skyline
+OUT.push({ l: H([[3744, -18], [3764, -18], [3764, -82], [3796, -82], [3796, -116], [3828, -116], [3828, -64], [3858, -64], [3858, -18], [3884, -18]], 121, .7, 4), w: [.1, .9] });
+const outEls = OUT.map(o => ({ ...o, e: el('path', { class: 'hand' }, cam) }));
+const hitRings = [[3639, -262], [3812, -66]].map(([x, y]) => el('circle', { class: 'ring', cx: x, cy: y, r: 30 }, cam));
+const gArrow = el('g', {}, cam); el('path', { d: 'M-12 -8 L0 0 L-12 8', class: 'ann', style: 'stroke-width:calc(var(--u)*2px)' }, gArrow);
+const nextT = txt(cam, 4262, 90, 'REAL-WORLD PROBLEMS →', 'mono', 'end'); nextT.style.fontSize = '18px';
 
 /* ================================================================
    Steps: each click sets new targets; a key may take a sequence of segments.
@@ -524,9 +650,10 @@ const D = {
   cur: 0, cpos: 0, hc: 0, cleave: 0, ann: 0, annO: 1, isp: 0, marks: 0, hcO: 1,
   ai: 0, gd: 0, pc: 0, close: 0, lblH: 0, lblA: 0, gv: 0, st1a: 0, st1b: 0, shape: 0, drift: 0, st2: 0, qm2: 0, ctr: 0,
   rowO: 1, hero: 0, ring: 0, stem: 0, tree: 0, bridge: 0, river: 0, cons1: 0, cons2: 0, consO: 1, st3: 0, st4: 0, st5: 0,
-  link: 0, terr: 0, tamp: 1, tspd: 1, ap: 0, ghost: 0, ghostX: 0, better: 0,
-  spark: 0, spiral: 0, rays: 0, cageD: 0, cr: 310, pw: 1, tool: 0, spin: 0, ctr2: 0, humanIn: 0, aim: 0, sketch: 0, trace: 0, impact: 0,
-  st6a: 0, st6b: 0, st7: 0, st8: 0, st9a: 0, st9b: 0, st10: 0, st11: 0, st12a: 0, st12b: 0, st13a: 0, st13b: 0, st14: 0,
+  link: 0, terr: 0, tamp: 1, tspd: 1, h1: 0, h2: 0, phN: 0, lblN: 0, phS: 0, lblS: 0, apps: 0, eco: 0, nDim: 0, lblT: 0, ap: 0,
+  cont: 0, lamp: 0, lglow: 0, lid: 0, smoke: 0, genie: 0, jIn: 0, greed: 0, wish: 0, tf: 0, b6: 0, rattle: 0,
+  dis: 0, morph: 0, pcirc: 0, aiT: 0, lampsO: 1, routes: 0, traces: 0, outc: 0,
+  st6: 0, st7: 0, st8: 0, st9: 0, st10: 0, st11: 0, st12: 0,
 };
 const STEPS = [
   { s: 1, n: 'Black' },
@@ -567,62 +694,60 @@ const STEPS = [
   { s: 3, n: 'Human creativity enters', fx: [['pen', 0], ['scratch', 0, 4.2]],
     stem: { to: 1, dur: 1.3, ease: 'inOut' }, tree: { to: 1, dur: 3.4, delay: 1.1, ease: 'linear' }, cons1: { to: 1, dur: 1.6, delay: .3, ease: 'linear' },
     camX: { to: 510, dur: 5, ease: 'inOutSine' }, camY: { to: -14, dur: 5, ease: 'inOutSine' } },
-  { s: 3, n: 'Perfection is not the finish line', fx: [['scratch', .2, 4.4]],
+  { s: 3, n: 'Beyond the circle?', fx: [['scratch', .2, 4.4]],
     bridge: { to: 1, dur: 3.6, ease: 'linear' }, river: { to: 1, dur: 4.4, delay: .3, ease: 'inOutSine' },
     cons2: { to: 1, dur: 2.4, delay: .6, ease: 'linear' }, st3: { to: 1, dur: 3.6, delay: .3, ease: 'linear' },
     camX: { to: 516, dur: 4.6, ease: 'inOutSine' }, camY: { to: 0, dur: 4.6, ease: 'inOutSine' }, camZ: { to: 2.7, dur: 4.6, ease: 'inOutSine' } },
-  { s: 3, n: "Don't just be perfect. Be valuable.",
+  { s: 3, n: 'Only the beginning',
     camX: { to: 523, dur: 3.4 }, camY: { to: 21, dur: 3.4 }, camZ: { to: 1.9, dur: 3.4 },
     st3: { to: 0, dur: .6 }, st4: { to: 1, dur: 1.9, delay: 1.7, ease: 'linear' } },
-  { s: 3, n: 'Go beyond it',
+  { s: 3, n: 'When the world changes?',
     consO: { to: 0, dur: 1.8, ease: 'linear' }, fine: { to: .35, dur: 2 }, grid: { to: .28, dur: 2 },
     st4: { to: 0, dur: .6 }, st5: { to: 1, dur: 2.6, delay: 1.1, ease: 'linear' }, corner: { to: 0, dur: 1.2 }, qo: { to: 0, dur: 1.2 },
     camZ: { to: 1.85, dur: 5, ease: 'inOutSine' } },
 
-  { s: 4, n: 'The world never stands still',
-    st5: { to: 0, dur: .6 }, camX: { to: 1720, dur: 3.4 }, camY: { to: 80, dur: 3.4 }, camZ: { to: 1, dur: 3.4 },
-    link: { to: 1, dur: 2.4, delay: .4, ease: 'inOutSine' }, terr: { to: 1, dur: 2.6, delay: 1.3, ease: 'out' },
-    fine: { to: 0, dur: 2 }, grid: { to: 1, dur: 2.4 }, corner: { to: 1, dur: 1.2, delay: 1.2 }, qo: { to: 1, dur: 1.2, delay: 1.2 },
-    st6a: { to: 1, dur: 1.5, delay: 3, ease: 'linear' } },
+  { s: 4, n: 'Nokia: a dominant name',
+    st5: { to: 0, dur: .6 }, camX: { to: 1765, dur: 3.4 }, camY: { to: 0, dur: 3.4 }, camZ: { to: 1, dur: 3.4 },
+    link: { to: 1, dur: 2.4, delay: .4, ease: 'inOutSine' }, terr: { to: 1, dur: 2.6, delay: 1.3, ease: 'out' }, tamp: { to: .45, dur: 1 },
+    h1: { to: 140, dur: 2.4, delay: 2 }, phN: { to: 1, dur: 2, delay: 2.6, ease: 'linear' }, lblN: { to: 1, dur: .8, delay: 4.2 },
+    fine: { to: 0, dur: 2 }, grid: { to: 1, dur: 2.4 }, corner: { to: 1, dur: 1.2, delay: 1.2 }, qo: { to: 1, dur: 1.2, delay: 1.2 } },
+  { s: 4, n: 'Touchscreens arrive', fx: [['pen', .1]],
+    phS: { to: 1, dur: 2, ease: 'linear' }, h2: { to: 70, dur: 2.2 }, lblS: { to: 1, dur: .8, delay: 1.6 },
+    st6: { to: 1, dur: 1.2, delay: 1.4, ease: 'linear' } },
+  { s: 4, n: 'Apps, software, ecosystem',
+    apps: { to: 1, dur: 2.2, ease: 'linear' }, eco: { to: 1, dur: 2.4, delay: .8, ease: 'linear' }, h2: { to: 115, dur: 2.4 } },
+  { s: 4, n: 'A hard transition',
+    st6: { to: 0, dur: .5 }, h1: { to: 10, dur: 3.2 }, h2: { to: 160, dur: 3.2 }, nDim: { to: 1, dur: 3 },
+    tspd: [{ to: 2.4, dur: 1 }, { to: 1, dur: 2, delay: 1 }], lblT: { to: 1, dur: .8, delay: 2.4 },
+    st7: { to: 1, dur: 2, delay: 1.4, ease: 'linear' } },
   { s: 4, n: 'We adapt to survive', fx: [['pen', 0], ['scratch', .1, 3.5]],
-    ap: { to: 1, dur: 3.6, ease: 'inOutSine' }, st6b: { to: 1, dur: 1.2, delay: 1.2, ease: 'linear' } },
-  { s: 4, n: 'What worked yesterday…',
-    st6a: { to: 0, dur: .5 }, st6b: { to: 0, dur: .5 }, ghost: { to: 1, dur: .8 }, st7: { to: 1, dur: 1.9, delay: .6, ease: 'linear' } },
-  { s: 4, n: 'When the world changes…',
-    st7: { to: 0, dur: .5 }, tamp: { to: 2.1, dur: 2.8 }, tspd: { to: 2.3, dur: 2 }, st8: { to: 1, dur: 2.1, delay: .8, ease: 'linear' } },
-  { s: 4, n: "Don't hold on to the old way",
-    st8: { to: 0, dur: .5 }, ghostX: { to: 1, dur: 2.4, ease: 'inOutSine' }, tspd: { to: 1.3, dur: 2 },
-    st9a: { to: 1, dur: 1.5, delay: .5, ease: 'linear' } },
-  { s: 4, n: 'Learn a better way', fx: [['scratch', .2, 3]],
-    better: { to: 1, dur: 3, delay: .2, ease: 'inOutSine' }, st9b: { to: 1, dur: 1.2, delay: .7, ease: 'linear' },
-    camX: { to: 1960, dur: 3.4, ease: 'inOutSine' }, camY: { to: 60, dur: 3.4, ease: 'inOutSine' }, camZ: { to: .92, dur: 3.4, ease: 'inOutSine' } },
+    st7: { to: 0, dur: .5 }, ap: { to: 1, dur: 3.6, ease: 'inOutSine' }, st8: { to: 1, dur: 1.4, delay: 1.2, ease: 'linear' } },
 
-  { s: 5, n: 'Extraordinary power?', fx: [['tone', 2.2]],
-    st9a: { to: 0, dur: .5 }, st9b: { to: 0, dur: .5 }, camX: { to: PX, dur: 3 }, camY: { to: 40, dur: 3 }, camZ: { to: 1.1, dur: 3 },
-    spark: { to: 1, dur: .6, delay: 1.9 }, spiral: { to: 1, dur: 2.6, delay: 2.1, ease: 'inOutSine' }, rays: { to: 1, dur: 2.4, delay: 3.2, ease: 'out' },
-    tamp: { to: 1, dur: 3 }, st10: { to: 1, dur: 2, delay: 3.6, ease: 'linear' } },
-  { s: 5, n: 'Power without understanding',
-    st10: { to: 0, dur: .5 }, cageD: { to: 1, dur: 1.4 }, cr: { to: 46, dur: 2.2, delay: 1.5 },
-    st11: { to: 1, dur: 2, delay: 2.2, ease: 'linear' } },
-  { s: 5, n: 'AI is a powerful tool',
-    st11: { to: 0, dur: .5 }, cr: { to: 150, dur: 1.6, ease: 'out' }, pw: { to: 0, dur: 1.2 }, tool: { to: 1, dur: 1.8, delay: .6, ease: 'linear' },
-    st12a: { to: 1, dur: 1.2, delay: 1.4, ease: 'linear' } },
-  { s: 5, n: 'The tool is not the strategy',
-    spin: { to: 1, dur: 1.6, ease: 'inOutSine' }, ctr2: { to: 1, dur: .6, delay: .8 }, st12b: { to: 1, dur: 1.6, delay: 1, ease: 'linear' } },
-  { s: 5, n: "Don't just use the power", fx: [['scratch', .6, 2.2]],
-    st12a: { to: 0, dur: .5 }, st12b: { to: 0, dur: .5 }, spin: { to: 0, dur: 2.2, ease: 'out' }, ctr2: { to: 0, dur: .6, delay: 1.6 },
-    humanIn: { to: 1, dur: 2.2, delay: .6, ease: 'inOutSine' }, st13a: { to: 1, dur: 1.4, delay: 1.2, ease: 'linear' } },
-  { s: 5, n: 'Learn to direct it', fx: [['pen', .6], ['scratch', .6, 2], ['tone', 2.8]],
-    aim: { to: 1, dur: 1 }, sketch: { to: 1, dur: 2, delay: .6, ease: 'inOutSine' }, trace: { to: 1, dur: 1.7, delay: 2.8 },
-    impact: { to: 1, dur: 1.6, delay: 4.5, ease: 'out' }, camX: { to: 3220, dur: 3.4, ease: 'inOutSine' }, camZ: { to: 1, dur: 3.4, ease: 'inOutSine' },
-    st13b: { to: 1, dur: 1.2, delay: 1, ease: 'linear' } },
-  { s: 5, n: 'Do more with it',
-    st13a: { to: 0, dur: .6 }, st13b: { to: 0, dur: .6 }, camX: { to: 1680, dur: 4.4 }, camY: { to: 425, dur: 4.4 }, camZ: { to: .4, dur: 4.4 },
-    hcO: { to: .6, dur: 2, delay: 1.4 }, grid: { to: .5, dur: 2 }, corner: { to: 0, dur: 1.2 }, qo: { to: 0, dur: 1.2 },
-    st14: { to: 1, dur: 3, delay: 2.6, ease: 'linear' } },
+  { s: 5, n: 'A mysterious lamp', fx: [['scratch', .2, 2.4]],
+    st8: { to: 0, dur: .5 }, cont: { to: 1, dur: 2.6, delay: .2, ease: 'inOutSine' },
+    camX: { to: 3020, dur: 3.4 }, camY: { to: 16, dur: 3.4 }, camZ: { to: 1.25, dur: 3.4 },
+    lamp: { to: 1, dur: 1.8, delay: 2.6, ease: 'linear' }, lglow: { to: 1, dur: 1.6, delay: 3.4 } },
+  { s: 5, n: 'The genie emerges', fx: [['pen', 0], ['tone', .4]],
+    lid: { to: 1, dur: .8, ease: 'out' }, smoke: { to: 1, dur: 1.6, delay: .4, ease: 'inOutSine' }, genie: { to: 1, dur: 2.4, delay: 1.1, ease: 'linear' } },
+  { s: 5, n: 'Jafar wants the power',
+    jIn: { to: 1, dur: 2.4, ease: 'linear' }, greed: { to: 1, dur: .9, delay: 2.4 } },
+  { s: 5, n: '“I wish to be a genie!”', wish: { to: 1, dur: 2.2, ease: 'linear' } },
+  { s: 5, n: 'The transformation', fx: [['tone', 0]], tf: { to: 1, dur: 3.6, ease: 'linear' } },
+  { s: 5, n: 'Triumph turns to shock', fx: [['pen', 1.1]],
+    b6: { to: 1, dur: 4.8, ease: 'linear' }, st9: { to: 1, dur: 1.4, delay: 4, ease: 'linear' } },
+  { s: 5, n: 'Know how to use it', rattle: { to: 1, dur: 1.8, ease: 'linear' }, st10: { to: 1, dur: 1.6, delay: .3, ease: 'linear' } },
+  { s: 5, n: 'Smoke becomes the AI circle', fx: [['tone', 1.6]],
+    st9: { to: 0, dur: .5 }, st10: { to: 0, dur: .5 }, dis: { to: 1, dur: 1.6 }, morph: { to: 1, dur: 2.2, delay: .4 },
+    pcirc: { to: 1, dur: 1.4, delay: 2.4 }, aiT: { to: 1, dur: 1.8, delay: 3.2, ease: 'linear' }, lampsO: { to: .22, dur: 1.6, delay: .4 },
+    camX: { to: 3150, dur: 3 }, camY: { to: -20, dur: 3 }, st11: { to: 1, dur: 1.6, delay: 3.8, ease: 'linear' } },
+  { s: 5, n: 'Turn it into real impact', fx: [['scratch', .6, 2.4], ['tone', 2.4]],
+    st11: { to: 0, dur: .5 }, camX: { to: 3480, dur: 3.4 }, camY: { to: 20, dur: 3.4 }, camZ: { to: .8, dur: 3.4 },
+    lampsO: { to: 0, dur: 1.4 }, routes: { to: 1, dur: 2.6, delay: .6, ease: 'linear' }, traces: { to: 1, dur: 2.2, delay: 2, ease: 'linear' },
+    outc: { to: 1, dur: 2.4, delay: 2.4, ease: 'linear' }, st12: { to: 1, dur: 2, delay: 3, ease: 'linear' } },
+
 ];
 const LAST = STEPS.length - 1;
-const SLIDE_START = { 1: 1, 2: 6, 3: 12, 4: 17, 5: 23 };
+const SLIDE_START = { 1: 1, 2: 6, 3: 12, 4: 17, 5: 22 };
 const META = new Set(['s', 'n', 'fx']);
 const norm = v => typeof v === 'number' ? [{ to: v }] : Array.isArray(v) ? v : [v];
 function targetAt(n) {
@@ -709,7 +834,7 @@ function jump(n) {
   for (const k in TR) delete TR[k];
   Object.assign(S, targetAt(n)); cur = n; afterNav();
 }
-const CHAP = { 1: '01 · The human circle', 2: '02 · AI draws it perfectly', 3: '03 · Beyond perfection', 4: '04 · Adapt to survive', 5: '05 · Learn to direct the power' };
+const CHAP = { 1: '01 · The human circle', 2: '02 · AI draws it perfectly', 3: '03 · Beyond perfection', 4: '04 · Adapt to survive', 5: '05 · The genie' };
 let chapShown = 1;
 function afterNav() {
   try { history.replaceState(null, '', '#step-' + cur); } catch (e) {}
@@ -774,7 +899,7 @@ function renderType() {
   qEl.style.filter = q < .99 ? `blur(${f2((1 - q) * 10)}px)` : 'none';
   $('#corner').style.opacity = S.corner * .9;
   $('#hint').style.opacity = S.hint * .6;
-  $('#scrim').style.opacity = Math.max(S.st3, S.st4, S.st5, S.st1a * .6, S.st6a, S.st7, S.st8, S.st9a, S.st10, S.st11, S.st12a, S.st13a, S.st14);
+  $('#scrim').style.opacity = Math.max(S.st3, S.st4, S.st5, S.st1a * .6, S.st6, S.st7, S.st8, S.st9, S.st11, S.st12);
 }
 
 /* ================================================================
@@ -966,7 +1091,8 @@ function renderWorld(dt) {
     else c.t.style.opacity = p * vis;
   });
 
-  // slide 4: the ground keeps moving; the path keeps adapting
+  // ---------- slide 4: Nokia on a moving market ----------
+  Zc = z;
   if (S.terr > 0) wt += dt * .6 * S.tspd;
   show(gTerr, S.terr > 0 ? 1 : 0);
   if (S.terr > 0) {
@@ -979,86 +1105,194 @@ function renderWorld(dt) {
     });
   }
   linkEl.setAttribute('d', linkL.d(0, E.inOutSine(S.link)));
+  // keypad phone standing on its peak
+  const nB = surf(NX, wt, S.tamp) - 4;
+  placeG(gPhN, NX, nB, 1, 7 * E.inOut(S.nDim));
+  gPhN.style.opacity = lerp(1, .38, S.nDim);
+  phN.forEach((e, i) => drawA(e, seg(S.phN, i * .08, .45 + i * .08)));
+  lblN.setAttribute('x', NX); lblN.setAttribute('y', f2(nB - 222));
+  lblN.style.opacity = S.lblN * lerp(1, .6, S.nDim);
+  lblT.setAttribute('x', NX); lblT.setAttribute('y', f2(nB - 244)); lblT.style.opacity = S.lblT;
+  // smartphone on the rising peak
+  const sB = surf(SX, wt, S.tamp) - 4;
+  placeG(gPhS, SX, sB, 1);
+  phS.forEach((e, i) => drawA(e, seg(S.phS, i * .12, .6 + i * .12)));
+  appEls.forEach((e, i) => drawA(e, seg(S.apps, i / appEls.length * .7, i / appEls.length * .7 + .3)));
+  lblS.setAttribute('x', SX); lblS.setAttribute('y', f2(sB - 236)); lblS.style.opacity = S.lblS;
+  ecoEls.forEach((o, i) => {
+    const k = E.out(seg(S.eco, i * .18, i * .18 + .45));
+    const ax = SX + Math.sign(o.dx) * 56, ay = sB - 106, bx = SX + o.dx, by = sB + o.dy;
+    o.ln.setAttribute('x1', f2(ax)); o.ln.setAttribute('y1', f2(ay));
+    o.ln.setAttribute('x2', f2(lerp(ax, bx, k))); o.ln.setAttribute('y2', f2(lerp(ay, by, k)));
+    o.dot.setAttribute('cx', f2(bx)); o.dot.setAttribute('cy', f2(by));
+    o.t.setAttribute('x', f2(bx + Math.sign(o.dx) * 12)); o.t.setAttribute('y', f2(by + 4));
+    o.ln.style.opacity = k > 0 ? .8 : 0; o.dot.style.opacity = seg(k, .8, 1); o.t.style.opacity = seg(k, .8, 1);
+  });
+  // the human path adapts to the ground
   const hx = lerp(T0, TXE, S.ap);
   let ad = '';
   if (S.ap > 0) { for (let x = T0; x < hx; x += 6) ad += (ad ? 'L' : 'M') + f2(x) + ' ' + f2(pathY(x, wt, S.tamp)); ad += 'L' + f2(hx) + ' ' + f2(pathY(hx, wt, S.tamp)); }
   adaptEl.setAttribute('d', ad);
   const hy = pathY(hx, wt, S.tamp);
   gWalker.setAttribute('transform', `translate(${f2(hx)} ${f2(hy)}) scale(${inv.toFixed(4)})`);
-  show(gWalker, S.ap > 0 && S.better < .02 ? 1 : 0);
-  if (S.ghost > 0 && ghostWT === null) { ghostWT = wt; ghostAmp = S.tamp; }
-  if (S.ghost <= 0) ghostWT = null;
-  const go_ = S.ghost * (1 - S.ghostX);
-  show(ghostEl, go_ > .001 ? go_ * .8 : 0); show(ghostLbl, go_ > .001 ? go_ : 0);
-  if (go_ > .001) {
-    let gd = '';
-    for (let x = T0; x <= TXE; x += 6) gd += (x === T0 ? 'M' : 'L') + f2(x) + ' ' + f2(pathY(x, ghostWT, ghostAmp));
-    ghostEl.setAttribute('d', gd);
-    const u = Math.max(.7, base);
-    ghostEl.style.strokeDasharray = `${f2(5 * u * (1 - S.ghostX * .6))}px ${f2((5 + 40 * S.ghostX) * u)}px`;
-    ghostLbl.setAttribute('y', f2(pathY(1900, ghostWT, ghostAmp) - 24));
-  }
-  if (S.better > 0) {
-    const bl = new Line(tremor(smooth([[hx, hy], ...BETTER], 14), 1.4, 71));
-    betterEl.setAttribute('d', bl.d(0, S.better));
-    const bh = bl.at(S.better);
-    gBetterHead.setAttribute('transform', `translate(${f2(bh[0])} ${f2(bh[1])}) scale(${inv.toFixed(4)})`);
-  } else betterEl.setAttribute('d', '');
-  show(gBetterHead, S.better > 0 && S.spiral <= 0 ? 1 : 0);
+  show(gWalker, S.ap > 0 && S.cont < .02 ? 1 : 0);
+  contEl.setAttribute('d', contL.d(0, E.inOutSine(S.cont)));
 
-  // slide 5: the power, the cage, the tool, the direction
-  gSpark.setAttribute('transform', `translate(${S5[0]} ${S5[1]}) scale(${inv.toFixed(4)})`);
-  show(gSpark, S.spark * S.pw);
-  const cr = S.cr, ps = Math.min(1, cr / 316);
-  show(gPow, (S.spiral > 0 ? 1 : 0) * S.pw);
-  if (S.spiral > 0) {
-    gPow.setAttribute('transform', `translate(${PX} ${PY}) scale(${ps.toFixed(4)}) translate(${-PX} ${-PY})`);
-    spiralEl.setAttribute('d', spiralL.d(0, S.spiral));
-    const now = performance.now() / 1000;
-    rays.forEach((r, i) => {
-      const g = E.out(seg(S.rays, (i % 9) / 9 * .5, (i % 9) / 9 * .5 + .5));
-      const L = (r.len + 12 * Math.sin(now * 2.3 + r.ph)) * g, c = Math.cos(r.a), sn = Math.sin(r.a);
-      r.e.setAttribute('x1', f2(PX + 170 * c)); r.e.setAttribute('y1', f2(PY + 170 * sn));
-      r.e.setAttribute('x2', f2(PX + (170 + L) * c)); r.e.setAttribute('y2', f2(PY + (170 + L) * sn));
-      r.e.style.opacity = g > 0 ? .5 : 0;
-    });
-    powGlow.style.opacity = (.12 + .3 * (1 - ps)) * Math.min(1, S.spiral * 2);
-  }
-  cageEl.setAttribute('d', circD(PX, PY, cr, -Math.PI / 2, TAU * E.inOut(S.cageD), 160));
-  armA += dt * S.spin * TAU * .85;
-  let aw = ((armA - ARM_AIM) % TAU + TAU) % TAU; if (aw > Math.PI) aw -= TAU;
-  const armShown = ARM_AIM + aw * (1 - E.inOut(S.aim));
-  show(gTool, S.tool > 0 ? 1 : 0);
-  if (S.tool > 0) {
-    toolTicks.forEach((t, i) => {
-      const a = -Math.PI / 2 + TAU * i / 48, r0 = cr + (i % 4 ? 8 : 4), r1 = cr + 16;
-      t.setAttribute('x1', f2(PX + r0 * Math.cos(a))); t.setAttribute('y1', f2(PY + r0 * Math.sin(a)));
-      t.setAttribute('x2', f2(PX + r1 * Math.cos(a))); t.setAttribute('y2', f2(PY + r1 * Math.sin(a)));
-      t.style.opacity = .32 * seg(S.tool, i / 48 * .6, i / 48 * .6 + .4);
-    });
-    toolGuides.forEach((g, i) => {
-      const k = E.out(seg(S.tool, .2 + i * .08, .7 + i * .08)), L = (cr + 70) * k;
-      g.e.setAttribute('x1', PX); g.e.setAttribute('y1', PY);
-      g.e.setAttribute('x2', f2(PX + g.d[0] * L)); g.e.setAttribute('y2', f2(PY + g.d[1] * L));
-    });
-    const ax = PX + cr * Math.cos(armShown), ay = PY + cr * Math.sin(armShown);
-    toolArm.setAttribute('x1', PX); toolArm.setAttribute('y1', PY); toolArm.setAttribute('x2', f2(ax)); toolArm.setAttribute('y2', f2(ay));
-    toolArm.style.opacity = seg(S.tool, .5, 1) * .8;
-    toolTrail.setAttribute('d', S.spin > .02 ? circD(PX, PY, cr, armShown - .9 * S.spin, .9 * S.spin, 40) : '');
-    toolTrail.style.opacity = .7;
-    gToolPt.setAttribute('transform', `translate(${PX} ${PY}) scale(${inv.toFixed(4)})`);
-    revT.textContent = 'rev ' + String(Math.max(0, Math.floor((armA + Math.PI / 2) / TAU))).padStart(4, '0');
-    revT.style.opacity = S.ctr2 * .85;
-  }
-  humanEl.setAttribute('d', humanL.d(0, E.inOutSine(S.humanIn)));
-  sketchEl.setAttribute('d', sketchL.d(0, S.sketch));
-  crossAEl.setAttribute('d', crossA.d(0, seg(S.sketch, .9, .95)));
-  crossBEl.setAttribute('d', crossB.d(0, seg(S.sketch, .95, 1)));
-  traceEl.setAttribute('d', traceL.d(0, S.trace));
-  traceGlow.setAttribute('d', S.trace > 0 && S.trace < 1 ? traceL.d(Math.max(0, S.trace - .1), S.trace) : '');
-  show(hitRing, S.impact > 0 ? 1 : 0);
-  show(hitPulse, S.impact > 0 && S.impact < 1 ? 1 - S.impact : 0);
-  hitPulse.setAttribute('r', 14 + 70 * S.impact);
+  // ---------- slide 5: the genie story ----------
+  const now = performance.now() / 1000, lo = S.lampsO;
+  placeG(gLamp, LMX, LMY, 1); gLamp.style.opacity = lo;
+  lampEls.forEach((e, i) => drawA(e, seg(S.lamp, i * .15, .55 + i * .15)));
+  const lidK = E.out(S.lid);
+  gLid.setAttribute('transform', `translate(${LMX} ${LMY - 34 * lidK}) translate(-28 -62) rotate(${f2(-38 * lidK)}) translate(28 62)`);
+  gLid.style.setProperty('--csw', (2.3 * Math.max(.7, base) / (base * Zc)).toFixed(4));
+  gLid.style.opacity = lo;
+  drawA(lidEl, seg(S.lamp, .5, 1));
+  lampGlow.style.opacity = S.lglow * (.14 + .08 * Math.sin(now * 1.7)) * lo * (1 - S.dis);
+  sparkles.forEach(s => {
+    const tw = Math.max(0, Math.sin(now * 1.3 + s.ph)), r = 7 * tw;
+    s.e.setAttribute('d', r > .3 ? `M${f2(s.x - r)} ${f2(s.y)}L${f2(s.x + r)} ${f2(s.y)}M${f2(s.x)} ${f2(s.y - r)}L${f2(s.x)} ${f2(s.y + r)}` : '');
+    s.e.style.opacity = S.lglow * (1 - S.lid) * .9;
+  });
+  // genie rising out of the smoke
+  const ge = E.inOut(S.genie), bob = 5 * Math.sin(now * 1.6);
+  const gx = lerp(SPOUT[0], GNX, ge), gy = lerp(SPOUT[1], GNY, ge) + bob * ge, gs = lerp(.12, 1, ge);
+  placeG(gGenie, gx, gy, gs);
+  gGenie.style.opacity = (S.genie > 0 ? 1 : 0) * (1 - S.dis);
+  GENIE.forEach((d, i) => drawA(gGenie.children[i], seg(S.genie, .25 + i * .04, .7 + i * .03)));
+  genieGlow.setAttribute('cx', f2(gx)); genieGlow.setAttribute('cy', f2(gy - 40 * gs));
+  genieGlow.style.opacity = S.genie * (.1 + .05 * Math.sin(now * 2)) * (1 - S.dis);
+  // smoke strands: spout → genie tail, then → the AI circle
+  const tailX = gx + 6 * gs, tailY = gy + 124 * gs;
+  smokeEls.forEach((e, k) => {
+    const rev = S.smoke, m = E.inOut(S.morph);
+    if (rev <= 0 && m <= 0) { e.setAttribute('d', ''); return; }
+    let d = ''; const n = 46, umax = m > 0 ? 1 : rev;
+    for (let i = 0; i <= n; i++) {
+      const u = i / n * umax, iu = 1 - u;
+      const c1 = [SPOUT[0] + 30, SPOUT[1] - 70], c2 = [tailX + (k - 1.5) * 10, tailY + 70];
+      let x = iu * iu * iu * SPOUT[0] + 3 * iu * iu * u * c1[0] + 3 * iu * u * u * c2[0] + u * u * u * tailX;
+      let y = iu * iu * iu * SPOUT[1] + 3 * iu * iu * u * c1[1] + 3 * iu * u * u * c2[1] + u * u * u * tailY;
+      const w = (5 + 4 * k) * Math.sin(Math.PI * u) * Math.sin(u * 7 + now * 2.2 + k * 1.4);
+      x += w; y += w * .3;
+      if (m > 0) { const a = -Math.PI / 2 + (k + i / n) * TAU / 4; x = lerp(x, GNX + AIR * Math.cos(a), m); y = lerp(y, GNY + AIR * Math.sin(a), m); }
+      d += (i ? 'L' : 'M') + f2(x) + ' ' + f2(y);
+    }
+    e.setAttribute('d', d);
+    e.style.opacity = (k ? .55 : .9) * (1 - seg(S.pcirc, .4, 1));
+  });
+
+  // Jafar
+  const jin = S.jIn, tfk = E.inOut(seg(S.tf, .45, .9)), suck = E.in(seg(S.b6, .56, 1));
+  let A = lerpArm(ARMS.neutral, ARMS.reach, E.inOut(S.greed));
+  A = lerpArm(A, ARMS.power, E.inOut(seg(S.tf, .5, .9)));
+  A = lerpArm(A, ARMS.triumph, E.inOut(seg(S.b6, 0, .2)));
+  A = lerpArm(A, ARMS.shock, E.inOut(seg(S.b6, .36, .44)));
+  let jx = lerp(2560, JX, E.out(jin)), jy = JY - (jin < 1 ? 7 * Math.abs(Math.sin(jin * Math.PI * 5)) : 0) - 50 * tfk;
+  let js = 1 + .45 * tfk;
+  if (S.tf > .5) jy += 4 * Math.sin(now * 1.6) * tfk;
+  const wx0 = jx, wy0 = jy - 90;                              // waist pivot
+  const wx = lerp(wx0, PL_SPOUT[0], suck), wy = lerp(wy0, PL_SPOUT[1] - 8, suck);
+  js *= lerp(1, .04, suck);
+  gJ.setAttribute('transform', `translate(${f2(wx)} ${f2(wy)}) scale(${js.toFixed(4)}) translate(0 90)`);
+  gJ.style.setProperty('--csw', (2.3 * Math.max(.7, base) / (base * Zc * js)).toFixed(4));
+  const jcol = mixC(seg(S.tf, .4, .85));
+  gJ.style.color = jcol;
+  gJ.style.opacity = (jin > 0 ? 1 : 0) * (1 - seg(S.b6, .93, 1));
+  const jd = seg(jin, 0, .75);
+  jHead.forEach((e, i) => drawA(e, seg(jd, i * .06, .5 + i * .06)));
+  const robeO = 1 - seg(S.tf, .45, .8);
+  jRobe.forEach((e, i) => { drawA(e, seg(jd, .2 + i * .1, .8 + i * .1)); e.style.opacity = robeO; });
+  drawA(jWaist, seg(jd, .5, 1));
+  drawA(jGenieBody, seg(S.tf, .5, .9));
+  drawA(jStaff, seg(jd, .4, 1)); jStaff.style.opacity = 1 - seg(S.tf, .45, .7);
+  A.forEach((a, i) => {
+    armEls[i].setAttribute('d', `M${f2(a[0])} ${f2(a[1])}C${f2(a[2])} ${f2(a[3])} ${f2(a[4])} ${f2(a[5])} ${f2(a[6])} ${f2(a[7])}`);
+    handEls[i].setAttribute('d', circD(a[6], a[7], 5, 0, TAU, 16));
+    drawA(armEls[i], seg(jd, .3, 1)); drawA(handEls[i], seg(jd, .6, 1));
+  });
+  let face = 'neutral', mouth = 'neutral';
+  if (S.greed > .5) { face = 'greed'; mouth = 'smirk'; }
+  if (S.wish > .12 && S.wish < .8 && S.tf <= 0) mouth = Math.sin(now * 15) > 0 ? 'talk' : 'smirk';
+  if (S.tf > .75) { face = 'triumph'; mouth = 'grin'; }
+  if (S.b6 > .4) { face = 'shock'; mouth = 'o'; }
+  for (const k in faceEls) drawA(faceEls[k], k === face ? jd : 0);
+  for (const k in mouthEls) drawA(mouthEls[k], k === mouth ? jd : 0);
+  glint.forEach(g => g.style.opacity = face === 'greed' ? .5 + .5 * Math.sin(now * 5) : 0);
+  // transformation: beam, swirl, glow, smoke tail
+  const toW = (lx, ly) => [wx + lx * js, wy + (ly + 90) * js];
+  const gh = [gx + 54 * gs, gy - 12 * gs], jc = toW(0, -140);
+  const beamK = seg(S.tf, 0, .28);
+  if (beamK > 0 && S.tf < .5) {
+    const bl = new Line(Array.from({ length: 41 }, (_, i) => { const u = i / 40; return [lerp(gh[0], jc[0], u), lerp(gh[1], jc[1], u) - 120 * Math.sin(Math.PI * u)]; }));
+    beamEl.setAttribute('d', bl.d(seg(S.tf, .28, .45), beamK));
+  } else beamEl.setAttribute('d', '');
+  const sw = Math.sin(Math.PI * seg(S.tf, .2, .95));
+  swirlEls.forEach((e, i) => {
+    const c = toW(0, -110 + i * 40);
+    e.setAttribute('d', sw > .01 ? circD(c[0], c[1], (90 + i * 10) * js, now * (2.4 + i * .7) + i * 2, 3.6, 48, 24 * js, -.12 + i * .1) : '');
+    e.style.opacity = sw * .8;
+  });
+  const glowK = Math.max(sw * .5, Math.sin(Math.PI * seg(S.b6, 0, .42)) * .6) * (1 - suck);
+  const jcg = toW(0, -130);
+  jGlow.setAttribute('cx', f2(jcg[0])); jGlow.setAttribute('cy', f2(jcg[1])); jGlow.setAttribute('r', f2(110 * js));
+  jGlow.style.opacity = glowK * .35;
+  const tailK = seg(S.tf, .5, .9);
+  if (tailK > 0 && S.b6 < .99) {
+    const t0 = toW(0, -40);
+    const end = suck > 0 ? [lerp(jx + 20, PL_SPOUT[0], suck), lerp(JY - 10, PL_SPOUT[1], suck)] : [jx + 26, JY - 30];
+    let d = '';
+    for (let i = 0; i <= 30; i++) {
+      const u = i / 30 * tailK, x = lerp(t0[0], end[0], u) + 18 * Math.sin(u * 5 + now * 2) * (1 - u * .5), y = lerp(t0[1], end[1], u);
+      d += (i ? 'L' : 'M') + f2(x) + ' ' + f2(y);
+    }
+    jTail.setAttribute('d', d);
+  } else jTail.setAttribute('d', '');
+  // the rules arrive: cuffs snap on, then the lamp pulls him in
+  const cuffK = seg(S.b6, .22, .32);
+  A.forEach((a, i) => {
+    const h = toW(a[6], a[7]);
+    cuffEls[i].setAttribute('d', cuffK > 0 && S.b6 < .99 ? circD(h[0], h[1], 10 * js, -Math.PI / 2, TAU * cuffK, 24) : '');
+  });
+  const fl = seg(S.b6, .3, .44);
+  const hc0 = toW(A[0][6], A[0][7]);
+  cuffFlash.setAttribute('cx', f2(hc0[0])); cuffFlash.setAttribute('cy', f2(hc0[1])); cuffFlash.setAttribute('r', f2(10 + 60 * fl));
+  cuffFlash.style.opacity = fl > 0 && fl < 1 ? (1 - fl) : 0;
+  // speech bubble
+  gBub.style.opacity = seg(S.wish, 0, .25) * (1 - seg(S.tf, 0, .2));
+  bubEl.setAttribute('d', bubL.d(0, E.inOut(seg(S.wish, 0, .35))));
+  bubT.style.opacity = seg(S.wish, .25, .45);
+  // the trap lamp (with a rattle)
+  const rat = Math.sin(Math.PI * S.rattle) * Math.sin(now * 38) * 7;
+  placeG(gPL, PLX, PLY, PLS, rat); gPL.style.opacity = lo;
+  plEls.forEach((e, i) => drawA(e, seg(S.b6, .44 + i * .02, .56 + i * .02)));
+  const pf = S.rattle;
+  if (pf > 0 && pf < 1) {
+    let d = '';
+    for (let i = 0; i <= 20; i++) { const u = i / 20 * seg(pf, .2, .7); d += (i ? 'L' : 'M') + f2(PL_SPOUT[0] + 30 * u + 6 * Math.sin(u * 9 + now * 3)) + ' ' + f2(PL_SPOUT[1] - 50 * u); }
+    puffEl.setAttribute('d', d); puffEl.style.opacity = 1 - seg(pf, .6, 1);
+  } else puffEl.setAttribute('d', '');
+
+  // smoke becomes the AI circle; the circle reaches out to real outcomes
+  aiCircleEl.setAttribute('d', aiCircle.d(0, S.pcirc));
+  show(gAI5, S.aiT > 0 ? 1 : 0);
+  ai5Ticks.forEach((t, i) => t.style.opacity = .32 * seg(S.aiT, i / 48 * .6, i / 48 * .6 + .3));
+  ai5Guides.forEach((g, i) => {
+    const k = E.out(seg(S.aiT, .1 + i * .08, .6 + i * .08)), L = (AIR + 70) * k;
+    g.e.setAttribute('x2', f2(GNX + g.d[0] * L)); g.e.setAttribute('y2', f2(GNY + g.d[1] * L));
+    g.e.style.opacity = .5 * (1 - S.routes * .5);
+  });
+  gAI5pt.setAttribute('transform', `translate(${GNX} ${GNY}) scale(${inv.toFixed(4)})`);
+  ai5Read.style.opacity = seg(S.aiT, .6, 1) * .85 * (1 - S.routes);
+  routes.forEach((r, i) => {
+    r.ske.setAttribute('d', r.sk.d(0, E.inOutSine(seg(S.routes, i * .15, .7 + i * .15))));
+    r.tre.setAttribute('d', r.tr.d(0, E.inOut(seg(S.traces, i * .15, .7 + i * .15))));
+  });
+  outEls.forEach(o => o.e.setAttribute('d', o.l.d(0, E.inOutSine(seg(S.outc, o.w[0], o.w[1])))));
+  hitRings.forEach((h, i) => { const k = seg(S.outc, .55 + i * .15, .85 + i * .15); h.style.opacity = k > 0 ? (1 - k * .6) : 0; h.setAttribute('r', f2(lerp(16, 40, E.out(k)))); });
+  const ae = routes[2].tr.at(.999), ab = routes[2].tr.at(.97);
+  gArrow.setAttribute('transform', `translate(${f2(ae[0])} ${f2(ae[1])}) rotate(${f2(Math.atan2(ae[1] - ab[1], ae[0] - ab[0]) * 180 / Math.PI)}) scale(${inv.toFixed(4)})`);
+  show(gArrow, S.traces > .99 ? 1 : 0);
+  nextT.style.opacity = seg(S.outc, .7, 1);
 }
 
 /* ================================================================
