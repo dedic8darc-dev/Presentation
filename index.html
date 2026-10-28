@@ -1,0 +1,883 @@
+<title>Will AI Take Your Job?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout concept: one infinite drafting canvas; a camera glides over it, statements sit in screen space above the world. */
+:root{
+  --ink:#0b0c0a;          /* canvas, near-black with a faint olive bias */
+  --paper:#efe9dc;        /* warm white line art and type */
+  --paper-dim:rgba(239,233,220,.46);
+  --paper-faint:rgba(239,233,220,.22);
+  --lime:#c8f53b;         /* AI, discoveries, key words — used sparingly */
+  --display:'Archivo','Helvetica Neue',Arial,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --gx:max(28px,4.2vw);
+  --u:1;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);overflow:hidden;
+  -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
+#bg,#world{position:fixed;inset:0;width:100%;height:100%;display:block}
+#ov{position:fixed;inset:0;pointer-events:none}
+
+/* ---------- world line art ---------- */
+#world path,#world line,#world circle{vector-effect:non-scaling-stroke;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.hand{stroke:var(--paper);stroke-width:calc(var(--u)*2.5px)}
+.hand-tex{stroke:var(--paper);stroke-width:calc(var(--u)*1px);opacity:.28}
+.perfect{stroke:var(--paper);stroke-width:calc(var(--u)*2.5px)}
+.trail{stroke:var(--lime);stroke-width:calc(var(--u)*3.2px)}
+.guide{stroke:var(--lime);stroke-width:calc(var(--u)*1px);opacity:.5}
+.cons{stroke:var(--paper);stroke-width:calc(var(--u)*1px);opacity:.26}
+.dash{stroke-dasharray:calc(var(--u)*4px) calc(var(--u)*5px)}
+.ann{stroke:var(--lime);stroke-width:calc(var(--u)*1.2px)}
+.tick{stroke:var(--paper);stroke-width:calc(var(--u)*1px);opacity:.3}
+#world .fill-lime{fill:var(--lime);stroke:none}
+#world .fill-paper{fill:var(--paper);stroke:none}
+#world .ring{stroke:var(--lime);stroke-width:calc(var(--u)*1.2px)}
+#world .ring-paper{stroke:var(--paper);stroke-width:calc(var(--u)*1.2px)}
+.mono{font-family:var(--mono);font-size:13.5px;letter-spacing:.14em;fill:var(--lime);font-weight:500}
+.mono.p{fill:var(--paper);opacity:.55}
+.lbl{font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:.2em;fill:var(--paper);font-variation-settings:"wdth" 112}
+.lbl .d{fill:var(--paper-dim)}
+.lbl .l{fill:var(--lime)}
+
+/* ---------- screen-space typography ---------- */
+#q,.qtwin{position:absolute;left:0;top:0;transform-origin:0 0;
+  font-family:var(--display);font-weight:850;font-variation-settings:"wdth" 108;
+  font-size:clamp(40px,8.4vw,170px);line-height:.9;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;opacity:0}
+.stm{position:absolute;font-family:var(--display);font-weight:800;font-variation-settings:"wdth" 110;
+  text-transform:uppercase;line-height:1;letter-spacing:.005em;text-wrap:balance}
+.stm .line{display:block}
+.stm .w{display:inline-block;margin-right:.24em;opacity:0;will-change:transform,opacity}
+.stm .hl{color:var(--lime)}
+.low{left:var(--gx);right:var(--gx);bottom:clamp(26px,8vh,100px);font-size:clamp(26px,4.3vw,92px)}
+.low.big{font-size:clamp(30px,5.8vw,124px)}
+.side{left:60%;right:var(--gx);top:50%;transform:translateY(-50%);font-size:clamp(28px,5vw,104px)}
+.qm{display:inline-block;margin-left:-.2em;color:var(--lime);opacity:0}
+#scrim{position:absolute;left:0;right:0;bottom:0;height:46vh;opacity:0;
+  background:linear-gradient(to top,rgba(11,12,10,.92) 0%,rgba(11,12,10,.7) 45%,rgba(11,12,10,0) 100%)}
+.corner{position:absolute;top:max(22px,3vh);right:var(--gx);text-align:right;font-family:var(--mono);
+  font-size:clamp(10px,.74vw,15px);letter-spacing:.18em;color:var(--paper-dim);text-transform:uppercase;line-height:1.9;opacity:0}
+.corner b{font-weight:500;color:var(--paper)}
+#chap{transition:opacity .6s ease}
+#hint{position:absolute;left:0;right:0;bottom:7vh;text-align:center;font-family:var(--mono);font-size:12px;
+  letter-spacing:.24em;color:var(--paper-dim);text-transform:uppercase}
+#hud{position:absolute;right:var(--gx);bottom:max(18px,2.4vh);display:flex;gap:14px;align-items:center;
+  opacity:0;transition:opacity .4s ease;font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--paper-dim)}
+#hud.on{opacity:1}
+#hud .grp{display:flex;gap:4px}
+#hud i{display:block;width:14px;height:3px;background:var(--paper-faint)}
+#hud i.done{background:var(--paper-dim)}
+#hud i.now{background:var(--lime)}
+#help{position:absolute;left:var(--gx);bottom:max(18px,2.4vh);font-family:var(--mono);font-size:12px;line-height:1.9;
+  letter-spacing:.08em;color:var(--paper-dim);background:rgba(11,12,10,.86);padding:16px 20px;border:1px solid var(--paper-faint)}
+#help b{color:var(--paper);font-weight:500;display:inline-block;min-width:11ch}
+</style>
+
+<canvas id="bg"></canvas>
+<svg id="world" xmlns="http://www.w3.org/2000/svg" aria-label="Animated canvas: a human circle, an AI circle, and a creative line beyond it">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+    <linearGradient id="rowFade" gradientUnits="userSpaceOnUse" x1="-362" y1="0" x2="1322" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".16" stop-color="#fff" stop-opacity="1"/>
+      <stop offset=".84" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="rowMask" maskUnits="userSpaceOnUse" x="-3000" y="-3000" width="6000" height="6000">
+      <rect x="-3000" y="-3000" width="6000" height="6000" fill="url(#rowFade)"/>
+    </mask>
+  </defs>
+  <g id="cam"></g>
+</svg>
+
+<div id="ov">
+  <div id="scrim"></div>
+  <div id="q">Will AI take<br>your job?</div>
+  <div class="corner" id="corner"><b>From Classroom to Real Impact</b><br><span id="chap">01 · The human circle</span></div>
+
+  <div class="stm side" id="isp" data-k="isp" data-t="Is it perfect?"></div>
+  <div class="stm low">
+    <div class="line" data-k="st1a" data-t="If the task is *predictable,*"></div>
+    <div class="line" data-k="st1b" data-t="it can be *automated.*"></div>
+  </div>
+  <div class="stm low" data-k="st2" data-t="Perfect. Repeatable. Replaceable"></div>
+  <div class="stm low" data-k="st3" data-t="Perfection is not the finish line."></div>
+  <div class="stm low big" data-k="st4" data-t="Don't just be perfect.|*Be* *valuable.*"></div>
+  <div class="stm low" data-k="st5" data-t="Don't compete with AI at being perfect.|Learn to *go* *beyond* *it.*"></div>
+
+  <div id="hint">Click or press → to begin</div>
+  <div id="hud"></div>
+  <div id="help" hidden>
+    <b>→ / Space / Click</b> next reveal<br>
+    <b>← / Right-click</b> previous reveal<br>
+    <b>1 · 2 · 3</b> jump to a slide<br>
+    <b>Home</b> back to black<br>
+    <b>F</b> fullscreen &nbsp; <b>M</b> sound on/off<br>
+    <b>H</b> progress bar &nbsp; <b>?</b> this help
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+/* ================================================================
+   Helpers
+   ================================================================ */
+const NS = 'http://www.w3.org/2000/svg';
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const seg = (v, a, b) => clamp((v - a) / (b - a));
+const TAU = Math.PI * 2;
+const E = {
+  linear: t => t,
+  in: t => t * t * t,
+  out: t => 1 - Math.pow(1 - t, 3),
+  outQuart: t => 1 - Math.pow(1 - t, 4),
+  outQuint: t => 1 - Math.pow(1 - t, 5),
+  inOut: t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+  inOutSine: t => -(Math.cos(Math.PI * t) - 1) / 2,
+};
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function txt(parent, x, y, str, cls, anchor = 'start') {
+  const t = el('text', { x, y, class: cls, 'text-anchor': anchor }, parent);
+  t.textContent = str;
+  return t;
+}
+const f2 = n => n.toFixed(2);
+
+/* A polyline we can draw partially: d(t0, t1) returns the path from fraction t0 to t1 of its length. */
+class Line {
+  constructor(pts) {
+    this.p = pts; this.c = [0];
+    for (let i = 1; i < pts.length; i++)
+      this.c.push(this.c[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+    this.L = this.c[this.c.length - 1];
+  }
+  at(t) {
+    const d = clamp(t) * this.L, c = this.c;
+    let lo = 0, hi = c.length - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (c[m] <= d) lo = m; else hi = m; }
+    const k = c[hi] - c[lo] ? (d - c[lo]) / (c[hi] - c[lo]) : 0;
+    const a = this.p[lo], b = this.p[hi];
+    return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lo];
+  }
+  d(t0, t1) {
+    if (t1 <= t0 + 1e-5) return '';
+    const a = this.at(t0), b = this.at(t1);
+    let s = 'M' + f2(a[0]) + ' ' + f2(a[1]);
+    for (let i = a[2] + 1; i <= b[2]; i++) s += 'L' + f2(this.p[i][0]) + ' ' + f2(this.p[i][1]);
+    return s + 'L' + f2(b[0]) + ' ' + f2(b[1]);
+  }
+  last() { return this.p[this.p.length - 1]; }
+}
+/* Catmull-Rom smoothing through hand-placed points. */
+function smooth(P, n = 14) {
+  const out = [];
+  for (let i = 0; i < P.length - 1; i++) {
+    const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || P[i + 1];
+    for (let k = 0; k < n; k++) {
+      const t = k / n, t2 = t * t, t3 = t2 * t;
+      out.push([0, 1].map(j => .5 * (2 * p1[j] + (-p0[j] + p2[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t2 + (-p0[j] + 3 * p1[j] - 3 * p2[j] + p3[j]) * t3)));
+    }
+  }
+  out.push(P[P.length - 1].slice());
+  return out;
+}
+/* Subtle hand tremor: tiny perpendicular offsets. */
+function tremor(pts, amp, seed) {
+  return pts.map((p, i) => {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
+    const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
+    const n = amp * (Math.sin(i * .37 + seed) * .6 + Math.sin(i * 1.13 + seed * 2.1) * .4);
+    return [p[0] - dy / l * n, p[1] + dx / l * n];
+  });
+}
+const circlePts = (cx, cy, r, n = 360, a0 = -Math.PI / 2) =>
+  Array.from({ length: n + 1 }, (_, i) => { const a = a0 + TAU * i / n; return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; });
+
+/* ================================================================
+   World geometry
+   ================================================================ */
+const cam = $('#cam');
+const G = name => el('g', { id: name }, cam);
+
+/* ---------- Slide 1: the human circle at (0,0) ---------- */
+const R = 180, TH0 = -2.2, GAP = .115, HN = 240;
+const handPts = [];
+for (let i = 0; i < HN; i++) {
+  const u = i / (HN - 1), th = TH0 + u * (TAU - GAP);
+  const r = R * (1 + .024 * Math.sin(2 * th + .6) + .011 * Math.sin(3 * th + 2.1) + .005 * Math.sin(7 * th + .3))
+            - 6.5 * u * u * u + .7 * Math.sin(u * 97);
+  handPts.push([r * Math.cos(th) * 1.022, r * Math.sin(th)]);
+}
+const hand = new Line(handPts);
+const handTex = new Line(handPts.map((p, i) => [p[0] + .9 * Math.sin(i * .21), p[1] + .7 * Math.cos(i * .17)]));
+// pen speed varies naturally along the stroke
+const penF = p => clamp(E.inOutSine(p) + .03 * Math.sin(TAU * p * 3) * Math.sin(Math.PI * p));
+
+// measurements used by the annotations
+const cen = handPts.reduce((a, p) => [a[0] + p[0] / HN, a[1] + p[1] / HN], [0, 0]);
+const dists = handPts.map(p => Math.hypot(p[0] - cen[0], p[1] - cen[1]));
+const Rm = dists.reduce((a, b) => a + b, 0) / HN;
+let iMax = 0, iMin = 0;
+for (let i = 30; i < HN - 30; i++) { if (dists[i] > dists[iMax] || !iMax) iMax = i; if (dists[i] < dists[iMin] || !iMin) iMin = i; }
+const P0 = handPts[0], PN = handPts[HN - 1];
+const gapMid = [(P0[0] + PN[0]) / 2, (P0[1] + PN[1]) / 2];
+const gapD = Math.hypot(P0[0] - PN[0], P0[1] - PN[1]);
+const xs = handPts.map(p => p[0]), ys = handPts.map(p => p[1]);
+const bb = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+const bbc = [(bb.x0 + bb.x1) / 2, (bb.y0 + bb.y1) / 2];
+const ovality = (bb.x1 - bb.x0) / (bb.y1 - bb.y0);
+const dir = i => { const p = handPts[i]; const l = Math.hypot(p[0] - cen[0], p[1] - cen[1]); return [(p[0] - cen[0]) / l, (p[1] - cen[1]) / l]; };
+
+const gHand = G('hand');
+const handTexEl = el('path', { class: 'hand-tex' }, gHand);
+const handEl = el('path', { class: 'hand' }, gHand);
+
+// click 4: annotations
+const gAnn = G('ann');
+const idealLine = new Line(circlePts(cen[0], cen[1], Rm, 240, TH0 + .2));
+const idealEl = el('path', { class: 'cons dash' }, gAnn);
+function radialMark(i, sign) {
+  const d = dir(i), p = handPts[i];
+  const a = [cen[0] + d[0] * Rm, cen[1] + d[1] * Rm];
+  const b = [p[0] + d[0] * 46, p[1] + d[1] * 46];
+  const ln = el('line', { class: 'ann', x1: a[0], y1: a[1], x2: a[0], y2: a[1] }, gAnn);
+  const dot = el('circle', { class: 'fill-lime', cx: p[0], cy: p[1], r: 2.4 }, gAnn);
+  const dv = dists[i] - Rm;
+  const t = txt(gAnn, b[0] + d[0] * 10, b[1] + d[1] * 10 + 4, (dv > 0 ? '+' : '−') + Math.abs(dv).toFixed(1), 'mono', d[0] < 0 ? 'end' : 'start');
+  return { ln, dot, t, a, b };
+}
+const mMax = radialMark(iMax), mMin = radialMark(iMin);
+const gapRing = el('circle', { class: 'ann dash', cx: gapMid[0], cy: gapMid[1], r: 19 }, gAnn);
+const gd0 = [gapMid[0] - cen[0], gapMid[1] - cen[1]], gdl = Math.hypot(...gd0);
+const gapLbl = txt(gAnn, gapMid[0] + gd0[0] / gdl * 34 - 4, gapMid[1] + gd0[1] / gdl * 34 - 6, 'GAP Δ ' + gapD.toFixed(1), 'mono', 'end');
+
+// click 5: more imperfections, one after another
+const gMarks = G('marks');
+const marks = [];
+{ // m1 ovality: the two axes
+  const g = el('g', {}, gMarks);
+  const h = new Line([[bb.x0 - 22, bbc[1]], [bb.x1 + 22, bbc[1]]]), v = new Line([[bbc[0], bb.y0 - 22], [bbc[0], bb.y1 + 22]]);
+  const he = el('path', { class: 'cons' }, g), ve = el('path', { class: 'cons' }, g);
+  const t = txt(g, bbc[0] + 10, bb.y1 + 40, 'OVALITY ' + ovality.toFixed(3) + ' : 1', 'mono');
+  marks.push(p => { he.setAttribute('d', h.d(0, E.out(seg(p, 0, .6)))); ve.setAttribute('d', v.d(0, E.out(seg(p, .2, .8)))); t.style.opacity = seg(p, .5, 1); });
+}
+{ // m2 centre drift: centroid vs bounding-box centre
+  const g = el('g', {}, gMarks);
+  const cross = (c, cls) => { el('line', { class: cls, x1: c[0] - 7, y1: c[1], x2: c[0] + 7, y2: c[1] }, g); el('line', { class: cls, x1: c[0], y1: c[1] - 7, x2: c[0], y2: c[1] + 7 }, g); };
+  cross(bbc, 'cons'); cross(cen, 'ann');
+  const dc = Math.hypot(cen[0] - bbc[0], cen[1] - bbc[1]);
+  const t = txt(g, cen[0] + 14, cen[1] + 26, 'CENTRE Δ ' + dc.toFixed(1), 'mono');
+  marks.push(p => { g.style.opacity = E.out(seg(p, 0, .6)); t.style.opacity = seg(p, .4, 1); });
+}
+{ // m3 pen speed: ticks at equal time steps land at unequal distances
+  const g = el('g', {}, gMarks); const ticks = [];
+  for (let k = 1; k < 28; k++) {
+    const t = penF(k / 28), a = hand.at(t), b = hand.at(Math.min(1, t + .002));
+    const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = dy / l, ny = -dx / l;
+    const s = (a[0] - cen[0]) * nx + (a[1] - cen[1]) * ny > 0 ? 1 : -1;
+    ticks.push(el('line', { class: 'ann', x1: a[0] + nx * s * 6, y1: a[1] + ny * s * 6, x2: a[0] + nx * s * 16, y2: a[1] + ny * s * 16 }, g));
+  }
+  const lp = hand.at(penF(5 / 28)), ld = [lp[0] - cen[0], lp[1] - cen[1]], ll = Math.hypot(...ld);
+  const t = txt(g, lp[0] + ld[0] / ll * 34, lp[1] + ld[1] / ll * 34, 'PEN SPEED', 'mono', ld[0] < 0 ? 'end' : 'start');
+  marks.push(p => { ticks.forEach((e, i) => e.style.opacity = seg(p, i / ticks.length * .7, i / ticks.length * .7 + .2)); t.style.opacity = seg(p, .5, 1); });
+}
+{ // m4 wobble: bracket the bumpiest stretch
+  let best = 60, bestV = -1;
+  for (let i = 40; i < HN - 70; i++) {
+    let v = 0; for (let j = i; j < i + 26; j++) v += Math.abs(dists[j + 1] - 2 * dists[j] + dists[j - 1]);
+    if (v > bestV) { bestV = v; best = i; }
+  }
+  const g = el('g', {}, gMarks);
+  const arc = []; for (let j = best; j <= best + 26; j++) { const d = dir(j), p = handPts[j]; arc.push([p[0] + d[0] * 16, p[1] + d[1] * 16]); }
+  const al = new Line(arc), ae = el('path', { class: 'ann' }, g);
+  const mid = best + 13, md = dir(mid), mp = handPts[mid];
+  const t = txt(g, mp[0] + md[0] * 34, mp[1] + md[1] * 34 + 4, 'WOBBLE', 'mono', md[0] < 0 ? 'end' : 'start');
+  marks.push(p => { ae.setAttribute('d', al.d(0, E.out(seg(p, 0, .6)))); t.style.opacity = seg(p, .4, 1); });
+}
+{ // m5 start ≠ end
+  const g = el('g', {}, gMarks);
+  const s = el('circle', { class: 'ring-paper', cx: P0[0], cy: P0[1], r: 5 }, g);
+  const e = el('circle', { class: 'fill-lime', cx: PN[0], cy: PN[1], r: 3.6 }, g);
+  const t1 = txt(g, P0[0] + 6, P0[1] - 26, 'START', 'mono p');
+  const t2 = txt(g, PN[0] + 14, PN[1] + 16, 'END', 'mono');
+  marks.push(p => { s.style.opacity = seg(p, 0, .4); e.style.opacity = seg(p, .3, .7); t1.style.opacity = seg(p, .2, .6); t2.style.opacity = seg(p, .5, 1); });
+}
+
+// cursor (kept at constant screen size)
+const gCur = el('g', {}, G('cursor'));
+el('path', { d: 'M0 0 L0 18 L4.6 13.8 L7.8 21 L10.6 19.8 L7.4 12.8 L13.2 12.8 Z', fill: '#efe9dc', stroke: '#0b0c0a', 'stroke-width': 1.3, style: 'stroke-linejoin:round' }, gCur);
+
+/* ---------- Slide 2: AI at (480,0) ---------- */
+const AX = 480;
+const gAI = G('ai');
+const guides = [
+  [[1, 0], 300], [[-1, 0], 300], [[0, -1], 280], [[0, 1], 280],
+  [[.7071, -.7071], 220], [[-.7071, .7071], 220], [[.7071, .7071], 220], [[-.7071, -.7071], 220]
+].map(([d, len]) => ({ d, len, e: el('line', { class: 'guide', x1: AX, y1: 0, x2: AX, y2: 0 }, gAI) }));
+const ticks = [];
+for (let i = 0; i < 48; i++) {
+  const a = -Math.PI / 2 + TAU * i / 48, r0 = i % 4 ? 194 : 190, r1 = 202;
+  ticks.push(el('line', { class: 'tick', x1: AX + r0 * Math.cos(a), y1: r0 * Math.sin(a), x2: AX + r1 * Math.cos(a), y2: r1 * Math.sin(a) }, gAI));
+}
+const pcLine = new Line(circlePts(AX, 0, R, 480));
+const pcEl = el('path', { class: 'perfect' }, gAI);
+const trailG = el('g', { filter: 'url(#glow)' }, gAI);
+const trails = Array.from({ length: 10 }, () => el('path', { class: 'trail' }, trailG));
+const armEl = el('line', { class: 'guide', x1: AX, y1: 0, x2: AX, y2: 0 }, gAI);
+const readA = txt(gAI, AX + 14, -14, 'x 480.000   y 0.000', 'mono');
+const readB = txt(gAI, AX + 14, 22, 'θ 000.0°', 'mono');
+const gPt = el('g', {}, gAI);
+const ptGlow = el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 16, filter: 'url(#glow)' }, gPt);
+const ptDot = el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 3.6 }, gPt);
+const gHead = el('g', {}, gAI);
+el('circle', { class: 'fill-lime', cx: 0, cy: 0, r: 3.4 }, gHead);
+const closeRing = el('circle', { class: 'ring', cx: AX, cy: -R, r: 4 }, gAI);
+
+const lblH = el('text', { x: 0, y: 252, class: 'lbl', 'text-anchor': 'middle' }, cam);
+lblH.innerHTML = '<tspan>HUMAN</tspan><tspan class="d"> — </tspan><tspan>IMPERFECT</tspan>';
+const lblA = el('text', { x: AX, y: 252, class: 'lbl', 'text-anchor': 'middle' }, cam);
+lblA.innerHTML = '<tspan class="l">AI</tspan><tspan class="d"> — </tspan><tspan>PRECISE</tspan>';
+
+// click 5: circle → line → a row of identical circles
+const NC = 11, SP = 150, RR = 60, PER = 64, MN = NC * PER, LY = 60, LX0 = AX - NC * SP / 2;
+const gRowM = el('g', { mask: 'url(#rowMask)' }, cam);
+const gRow = el('g', {}, gRowM);
+const rowEl = el('path', { class: 'perfect' }, gRow);
+const mCircle = [], mLine = [], mRow = [];
+for (let i = 0; i < MN; i++) {
+  const a = Math.PI / 2 + TAU * i / (MN - 1);
+  mCircle.push([AX + R * Math.cos(a), R * Math.sin(a)]);
+  mLine.push([LX0 + NC * SP * i / (MN - 1), LY]);
+  const k = Math.floor(i / PER), t = (i % PER) / (PER - 1), cx = LX0 + SP * (k + .5), ph = Math.PI / 2 + TAU * t;
+  mRow.push([cx + RR * Math.cos(ph), RR * Math.sin(ph)]);
+}
+const gCtr = el('g', {}, cam);
+el('line', { class: 'guide', x1: AX, y1: -RR - 34, x2: AX, y2: -RR - 14 }, gCtr);
+const ctrT = txt(gCtr, AX, -RR - 44, 'n = 0000', 'mono', 'middle');
+
+/* ---------- Slide 3: inside the stopped circle; local units, circle r=180 ---------- */
+const g3 = el('g', { transform: `translate(${AX} 0) scale(${1 / 3})` }, cam);
+const heroEl = el('circle', { class: 'perfect', cx: 0, cy: 0, r: R }, g3);
+const ringEl = el('circle', { class: 'ring-paper', cx: 0, cy: 0, r: R }, g3);
+
+const H = (pts, seed, amp = 1.6, n = 14) => new Line(tremor(smooth(pts, n), amp, seed));
+const O = [R * Math.cos(-.26), R * Math.sin(-.26)];
+const stem = H([O, [232, -62], [286, -44], [322, -12]], 1);
+const tree = [
+  { l: H([[322, -12], [344, -82], [330, -150], [362, -228], [404, -300]], 2), w: [0, .42] },
+  { l: H([[338, -116], [392, -154], [458, -150], [496, -126]], 3), w: [.26, .56], dot: 1 },
+  { l: H([[362, -228], [312, -276], [286, -330], [236, -356]], 4), w: [.4, .72], dot: 1 },
+  { l: H([[404, -300], [386, -364], [414, -428]], 5), w: [.56, .88], dot: 1 },
+  { l: H([[404, -300], [462, -340], [528, -338]], 6), w: [.64, 1], dot: 1 },
+];
+const archPts = []; for (let x = 470; x <= 900; x += 10) archPts.push([x, 120 - 150 * (1 - Math.pow((x - 685) / 215, 2))]);
+const bridge = [
+  { l: H([[322, -12], [372, 34], [430, 88], [470, 120]], 7), w: [0, .2] },
+  { l: H([[470, 120], [610, 123], [760, 118], [900, 121]], 8, .9), w: [.16, .52] },
+  { l: H(archPts, 9, .9, 3), w: [.28, .74] },
+  { l: H([[470, 120], [466, 176]], 10, .5), w: [.8, .92] },
+  { l: H([[900, 121], [904, 178]], 11, .5), w: [.84, .96] },
+];
+for (let i = 0; i < 7; i++) {
+  const x = 542 + i * 48, ya = 120 - 150 * (1 - Math.pow((x - 685) / 215, 2));
+  bridge.push({ l: H([[x, ya + 3], [x + .8, 119]], 12 + i, .4, 4), w: [.56 + i * .05, .66 + i * .05] });
+}
+const river = { l: H([[300, -28], [306, 70], [246, 184], [130, 250], [-12, 270], [-160, 242], [-262, 190],
+  [-336, 116], [-420, 70], [-498, 92], [-560, 44], [-582, -48], [-556, -150], [-628, -226]], 30, 1.8, 16), w: [0, 1] };
+const all3 = [{ l: stem, w: [0, 1], k: 'stem' }, ...tree.map(o => ({ ...o, k: 'tree' })), ...bridge.map(o => ({ ...o, k: 'bridge' })), { ...river, k: 'river' }];
+for (const o of all3) {
+  o.e = el('path', { class: 'hand' }, g3);
+  if (o.dot) o.dotEl = el('circle', { class: 'fill-paper', cx: o.l.last()[0], cy: o.l.last()[1], r: 9 }, g3);
+}
+const riverEnd = el('circle', { class: 'fill-lime', cx: river.l.last()[0], cy: river.l.last()[1], r: 10 }, g3);
+const riverRing = el('circle', { class: 'ring', cx: river.l.last()[0], cy: river.l.last()[1], r: 10 }, g3);
+
+// slide 3 construction marks (removed at the end)
+const cons3 = [];
+{
+  const g = el('g', {}, g3);
+  const mk = (pts, cls, key, w) => { const l = new Line(pts); const e = el('path', { class: cls }, g); cons3.push({ l, e, key, w }); };
+  mk([[-30, 0], [30, 0]], 'cons', 'cons1', [0, .4]);
+  mk([[0, -30], [0, 30]], 'cons', 'cons1', [.1, .5]);
+  const tx = Math.sin(.26), ty = Math.cos(.26);
+  mk([[O[0] - tx * 150, O[1] - ty * 150], [O[0] + tx * 150, O[1] + ty * 150]], 'cons dash', 'cons1', [.3, 1]);
+  mk([[360, 120], [1010, 120]], 'cons dash', 'cons2', [0, .5]);
+  mk([[470, 214], [900, 214]], 'cons', 'cons2', [.3, .7]);
+  mk([[470, 202], [470, 226]], 'cons', 'cons2', [.4, .6]);
+  mk([[900, 202], [900, 226]], 'cons', 'cons2', [.5, .7]);
+  mk(circlePts(-560, 44, 40, 40, Math.PI * .62).slice(0, 14), 'cons', 'cons2', [.6, 1]);
+  const t1 = txt(g, 685, 250, 'SPAN', 'mono p', 'middle'); t1.style.fontSize = '30px';
+  const t2 = txt(g, -616, 112, 'θ', 'mono p', 'middle'); t2.style.fontSize = '34px';
+  cons3.push({ t: t1, key: 'cons2', w: [.6, 1] }, { t: t2, key: 'cons2', w: [.8, 1] });
+}
+
+/* ================================================================
+   Steps: each click sets new targets; a key may take a sequence of segments.
+   ================================================================ */
+const GX = gapMid[0], GY = gapMid[1];
+const D = {
+  camX: 0, camY: 0, camZ: 1.25, orbit: 0, grid: 0, dust: 0, fine: 0, hint: 1, q: 0, qm: 0, qo: 1, corner: 0,
+  cur: 0, cpos: 0, hc: 0, cleave: 0, ann: 0, annO: 1, isp: 0, marks: 0, hcO: 1,
+  ai: 0, gd: 0, pc: 0, close: 0, lblH: 0, lblA: 0, gv: 0, st1a: 0, st1b: 0, shape: 0, drift: 0, st2: 0, qm2: 0, ctr: 0,
+  rowO: 1, hero: 0, ring: 0, stem: 0, tree: 0, bridge: 0, river: 0, cons1: 0, cons2: 0, consO: 1, st3: 0, st4: 0, st5: 0,
+};
+const STEPS = [
+  { s: 1, n: 'Black' },
+  { s: 1, n: 'The question', hint: { to: 0, dur: .5 }, q: { to: 1, dur: 2.4, ease: 'outQuint' } },
+  { s: 1, n: 'The canvas opens', fx: [['pen', 1.3]],
+    qm: { to: 1, dur: 1.8, ease: 'inOut' }, camZ: { to: 1, dur: 2.4 }, camX: { to: 150, dur: 2.4 },
+    grid: { to: 1, dur: 2.2, delay: .3 }, dust: { to: 1, dur: 2.6 }, corner: { to: 1, dur: 1.2, delay: 1 },
+    cur: { to: 1, dur: .5, delay: 1.2, ease: 'out' } },
+  { s: 1, n: 'Draw the circle', fx: [['pen', .55], ['scratch', .6, 3.9]],
+    cpos: { to: 1, dur: .55 }, hc: { to: 1, dur: 3.9, delay: .6, ease: 'linear' }, cleave: { to: 1, dur: 1, delay: 4.7 } },
+  { s: 1, n: 'Is it perfect?', cur: { to: 0, dur: .5 }, ann: { to: 1, dur: 2.6, delay: .2, ease: 'linear' },
+    isp: { to: 1, dur: 1.4, delay: 1.6, ease: 'linear' } },
+  { s: 1, n: 'Expand the problem', marks: { to: 1, dur: 6.5, ease: 'linear' }, orbit: { to: 1, dur: 8.5, ease: 'inOutSine' } },
+
+  { s: 2, n: 'Into the gap · AI enters',
+    camX: [{ to: GX, dur: 1.4, ease: 'out' }, { to: 240, dur: 2.3, delay: .25, ease: 'inOut' }],
+    camY: [{ to: GY, dur: 1.4, ease: 'out' }, { to: 0, dur: 2.3, delay: .25, ease: 'inOut' }],
+    camZ: [{ to: 26, dur: 1.4, ease: 'in' }, { to: .95, dur: 2.3, delay: .25, ease: 'outQuart' }],
+    isp: { to: 0, dur: .5 }, annO: { to: 0, dur: 1 }, ai: { to: 1, dur: 1, delay: 2.9, ease: 'out' },
+    gd: { to: 1, dur: 1.8, delay: 3.2, ease: 'linear' } },
+  { s: 2, n: 'The perfect circle', fx: [['tone', 0]], pc: { to: 1, dur: 3, ease: 'inOut' }, close: { to: 1, dur: 1.1, delay: 3, ease: 'out' } },
+  { s: 2, n: 'Human — imperfect', lblH: { to: 1, dur: 1.3, ease: 'out' } },
+  { s: 2, n: 'AI — precise', lblA: { to: 1, dur: 1.3, ease: 'out' } },
+  { s: 2, n: 'Predictable → automated',
+    camX: { to: AX, dur: 2.6 }, camY: { to: 95, dur: 2.6 }, camZ: { to: 1.4, dur: 2.6 },
+    gv: { to: 1, dur: 2.6, delay: .7, ease: 'linear' }, hcO: { to: .14, dur: 1.6 }, lblH: { to: 0, dur: .8 }, lblA: { to: 0, dur: .8 },
+    st1a: { to: 1, dur: 1.5, delay: 1.5, ease: 'linear' }, st1b: { to: 1, dur: 1.3, delay: 3.3, ease: 'linear' } },
+  { s: 2, n: 'Perfect. Repeatable. Replaceable?',
+    st1a: { to: 0, dur: .5 }, st1b: { to: 0, dur: .5 }, camY: { to: 60, dur: 2.6 }, camZ: { to: .95, dur: 2.6 },
+    shape: [{ to: 1, dur: 1.5, delay: .3 }, { to: 2, dur: 1.9, delay: .25 }], hcO: { to: 0, dur: 1 },
+    drift: { to: 1, dur: 1.6, delay: 3.9, ease: 'inOutSine' }, ctr: { to: 1, dur: .8, delay: 4.3 },
+    st2: { to: 1, dur: 2.2, delay: 4.1, ease: 'linear' }, qm2: { to: 1, dur: 1, delay: 7, ease: 'outQuint' } },
+
+  { s: 3, n: 'The perfect circle remains',
+    rowO: { to: 0, dur: 1.8, delay: .2 }, hero: { to: 1, dur: .5 }, ctr: { to: 0, dur: .5 }, st2: { to: 0, dur: .5 }, qm2: { to: 0, dur: .4 },
+    camX: { to: AX, dur: 2.8 }, camY: { to: 0, dur: 2.8 }, camZ: { to: 3, dur: 2.8 },
+    ring: { to: 1, dur: 2.4, delay: 1.5, ease: 'out' }, fine: { to: 1, dur: 2, delay: 1.8 }, grid: { to: .45, dur: 2 } },
+  { s: 3, n: 'Human creativity enters', fx: [['pen', 0], ['scratch', 0, 4.2]],
+    stem: { to: 1, dur: 1.3, ease: 'inOut' }, tree: { to: 1, dur: 3.4, delay: 1.1, ease: 'linear' }, cons1: { to: 1, dur: 1.6, delay: .3, ease: 'linear' },
+    camX: { to: 510, dur: 5, ease: 'inOutSine' }, camY: { to: -14, dur: 5, ease: 'inOutSine' } },
+  { s: 3, n: 'Perfection is not the finish line', fx: [['scratch', .2, 4.4]],
+    bridge: { to: 1, dur: 3.6, ease: 'linear' }, river: { to: 1, dur: 4.4, delay: .3, ease: 'inOutSine' },
+    cons2: { to: 1, dur: 2.4, delay: .6, ease: 'linear' }, st3: { to: 1, dur: 3.6, delay: .3, ease: 'linear' },
+    camX: { to: 516, dur: 4.6, ease: 'inOutSine' }, camY: { to: 0, dur: 4.6, ease: 'inOutSine' }, camZ: { to: 2.7, dur: 4.6, ease: 'inOutSine' } },
+  { s: 3, n: "Don't just be perfect. Be valuable.",
+    camX: { to: 523, dur: 3.4 }, camY: { to: 21, dur: 3.4 }, camZ: { to: 1.9, dur: 3.4 },
+    st3: { to: 0, dur: .6 }, st4: { to: 1, dur: 1.9, delay: 1.7, ease: 'linear' } },
+  { s: 3, n: 'Go beyond it',
+    consO: { to: 0, dur: 1.8, ease: 'linear' }, fine: { to: .35, dur: 2 }, grid: { to: .28, dur: 2 },
+    st4: { to: 0, dur: .6 }, st5: { to: 1, dur: 2.6, delay: 1.1, ease: 'linear' }, corner: { to: 0, dur: 1.2 }, qo: { to: 0, dur: 1.2 },
+    camZ: { to: 1.85, dur: 5, ease: 'inOutSine' } },
+];
+const LAST = STEPS.length - 1;
+const SLIDE_START = { 1: 1, 2: 6, 3: 12 };
+const META = new Set(['s', 'n', 'fx']);
+const norm = v => typeof v === 'number' ? [{ to: v }] : Array.isArray(v) ? v : [v];
+function targetAt(n) {
+  const t = { ...D };
+  for (let i = 1; i <= n; i++) for (const k in STEPS[i]) if (!META.has(k)) { const a = norm(STEPS[i][k]); t[k] = a[a.length - 1].to; }
+  return t;
+}
+
+/* ================================================================
+   Tween engine (per key, sequential segments; zoom tweens in log space)
+   ================================================================ */
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SPEED = reduce ? .45 : 1;
+const S = { ...D }, TR = {};
+function track(k, segs, now) {
+  let t = now, from = S[k]; const out = [];
+  for (const g of segs) {
+    t += (g.delay || 0) * 1000 * SPEED;
+    const dur = Math.max(1, (g.dur ?? 1) * 1000 * SPEED);
+    out.push({ from, to: g.to, t0: t, dur, ease: E[g.ease || 'inOut'] });
+    from = g.to; t += dur;
+  }
+  TR[k] = out;
+}
+function tick(now) {
+  for (const k in TR) {
+    let v = S[k], done = true;
+    for (const g of TR[k]) {
+      if (now < g.t0) { done = false; break; }
+      const p = clamp((now - g.t0) / g.dur), e = g.ease(p);
+      v = k === 'camZ' ? Math.exp(lerp(Math.log(g.from), Math.log(g.to), e)) : lerp(g.from, g.to, e);
+      if (p < 1) { done = false; break; }
+    }
+    S[k] = v;
+    if (done) delete TR[k];
+  }
+}
+
+/* ================================================================
+   Sound (synthesised, optional)
+   ================================================================ */
+let AC = null, muted = false, timers = [];
+function ac() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } } if (AC && AC.state === 'suspended') AC.resume(); return AC; }
+function noise(c, sec) { const b = c.createBuffer(1, Math.ceil(c.sampleRate * sec), c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b; }
+const FX = {
+  pen() { const c = ac(); if (!c || muted) return; const s = c.createBufferSource(); s.buffer = noise(c, .06);
+    const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1800; f.Q.value = 1.2;
+    const g = c.createGain(), t = c.currentTime; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.35, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + .06);
+    s.connect(f).connect(g).connect(c.destination); s.start(t); },
+  scratch(sec) { const c = ac(); if (!c || muted) return; const s = c.createBufferSource(); s.buffer = noise(c, sec);
+    const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 3800; f.Q.value = .7;
+    const g = c.createGain(), t = c.currentTime; g.gain.setValueAtTime(.0001, t);
+    for (let i = 0; i <= 24; i++) g.gain.linearRampToValueAtTime(.018 + .02 * Math.abs(Math.sin(i * 1.7)), t + sec * i / 24);
+    g.gain.linearRampToValueAtTime(.0001, t + sec + .1);
+    s.connect(f).connect(g).connect(c.destination); s.start(t); },
+  tone() { const c = ac(); if (!c || muted) return; const o = c.createOscillator(), g = c.createGain(), t = c.currentTime;
+    o.type = 'sine'; o.frequency.setValueAtTime(660, t); o.frequency.linearRampToValueAtTime(880, t + 3);
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.025, t + .4); g.gain.linearRampToValueAtTime(.02, t + 2.8); g.gain.exponentialRampToValueAtTime(.0001, t + 3.6);
+    o.connect(g).connect(c.destination); o.start(t); o.stop(t + 3.7); },
+};
+
+/* ================================================================
+   Navigation
+   ================================================================ */
+let cur = 0;
+function go(n) {
+  n = clamp(n, 0, LAST);
+  if (n === cur) return;
+  const now = performance.now();
+  timers.forEach(clearTimeout); timers = [];
+  if (n === cur + 1) {
+    const st = STEPS[n];
+    for (const k in st) if (!META.has(k)) track(k, norm(st[k]), now);
+    (st.fx || []).forEach(([name, delay, arg]) => timers.push(setTimeout(() => FX[name](arg), delay * 1000 * SPEED)));
+  } else {
+    const t = targetAt(n);
+    for (const k in t) if (Math.abs(S[k] - t[k]) > 1e-4 || TR[k]) track(k, [{ to: t[k], dur: .9 }], now);
+  }
+  cur = n; afterNav();
+}
+function jump(n) {
+  n = clamp(n, 0, LAST);
+  timers.forEach(clearTimeout); timers = [];
+  for (const k in TR) delete TR[k];
+  Object.assign(S, targetAt(n)); cur = n; afterNav();
+}
+const CHAP = { 1: '01 · The human circle', 2: '02 · AI draws it perfectly', 3: '03 · Beyond perfection' };
+let chapShown = 1;
+function afterNav() {
+  try { history.replaceState(null, '', '#step-' + cur); } catch (e) {}
+  const s = STEPS[cur].s;
+  if (s !== chapShown) { const c = $('#chap'); c.style.opacity = 0; setTimeout(() => { c.textContent = CHAP[s]; c.style.opacity = 1; }, 600); chapShown = s; }
+  renderHud();
+}
+
+/* ================================================================
+   Screen typography
+   ================================================================ */
+const stms = [...document.querySelectorAll('[data-k]')].map(node => {
+  const lines = node.dataset.t.split('|');
+  node.textContent = '';
+  const words = [];
+  lines.forEach(line => {
+    const ld = document.createElement('span'); ld.className = 'line';
+    line.split(' ').forEach(w => {
+      const sp = document.createElement('span'); sp.className = 'w';
+      if (w.startsWith('*')) { sp.classList.add('hl'); w = w.replace(/\*/g, ''); }
+      sp.textContent = w; ld.appendChild(sp); words.push(sp);
+    });
+    node.appendChild(ld);
+  });
+  return { node, k: node.dataset.k, words };
+});
+const qmEl = document.createElement('span'); qmEl.className = 'qm'; qmEl.textContent = '?';
+stms.find(s => s.k === 'st2').words.at(-1).after(qmEl);
+const qEl = $('#q');
+let qRect = null;
+// a hidden twin at the final tracking gives a stable size to centre on (offset sizes ignore transforms)
+const qTwin = qEl.cloneNode(true);
+qTwin.removeAttribute('id'); qTwin.setAttribute('aria-hidden', 'true');
+Object.assign(qTwin.style, { visibility: 'hidden', letterSpacing: '.02em', transform: 'none', opacity: 0 });
+qTwin.className = 'qtwin'; qEl.after(qTwin);
+function measureQ() { qRect = { w: qTwin.offsetWidth, h: qTwin.offsetHeight }; }
+function renderType() {
+  for (const s of stms) {
+    const p = S[s.k], n = s.words.length;
+    s.node.style.visibility = p > .001 ? 'visible' : 'hidden';
+    if (p <= .001) continue;
+    s.words.forEach((w, i) => {
+      const v = E.out(clamp((p * (n + .9) - i) / 1.4));
+      w.style.opacity = v;
+      w.style.transform = `translateY(${f2((1 - v) * .32)}em)`;
+      w.style.letterSpacing = f2(lerp(.16, .005, v)) + 'em';
+      w.style.filter = v < .99 ? `blur(${f2((1 - v) * 7)}px)` : 'none';
+    });
+  }
+  const qv = S.qm2;
+  qmEl.style.opacity = qv; qmEl.style.transform = `scale(${f2(lerp(1.5, 1, qv))})`; qmEl.style.filter = qv < .99 ? `blur(${f2((1 - qv) * 8)}px)` : 'none';
+  // the title question: tracking in, then glide to the upper-left
+  const q = S.q, m = S.qm;
+  measureQ();
+  const ls = lerp(.34, .02, E.out(q));
+  const sc = lerp(1, .26, m);
+  const padL = Math.max(28, innerWidth * .042), padT = Math.max(22, innerHeight * .03);
+  const cx = (innerWidth - qRect.w) / 2, cy = (innerHeight - qRect.h) / 2;
+  qEl.style.letterSpacing = f2(ls) + 'em';
+  qEl.style.transform = `translate(${f2(lerp(cx, padL, m))}px, ${f2(lerp(cy, padT, m))}px) scale(${sc.toFixed(4)})`;
+  qEl.style.opacity = clamp(q) * lerp(1, .62, m) * S.qo;
+  qEl.style.filter = q < .99 ? `blur(${f2((1 - q) * 10)}px)` : 'none';
+  $('#corner').style.opacity = S.corner * .9;
+  $('#hint').style.opacity = S.hint * .6;
+  $('#scrim').style.opacity = Math.max(S.st3, S.st4, S.st5, S.st1a * .6);
+}
+
+/* ================================================================
+   Background canvas: grain, dust and grids at different parallax depths
+   ================================================================ */
+const cv = $('#bg'), ctx = cv.getContext('2d');
+let W = 0, Hh = 0, DPR = 1, base = 1, vig = null, grain = null;
+const dust = Array.from({ length: 260 }, (_, i) => {
+  const r = Math.sin(i * 12.9898) * 43758.5453, r2 = Math.sin(i * 78.233) * 12543.21, r3 = Math.sin(i * 3.7) * 9999;
+  return [(r - Math.floor(r) - .5) * 5200, (r2 - Math.floor(r2) - .5) * 3400, .4 + (r3 - Math.floor(r3)) * 1.1];
+});
+function resize() {
+  W = innerWidth; Hh = innerHeight; DPR = Math.min(2, devicePixelRatio || 1);
+  cv.width = W * DPR; cv.height = Hh * DPR;
+  base = Math.min(W / 1600, Hh / 900);
+  document.documentElement.style.setProperty('--u', Math.max(.7, base).toFixed(3));
+  vig = document.createElement('canvas'); vig.width = W; vig.height = Hh;
+  const v = vig.getContext('2d'), g = v.createRadialGradient(W / 2, Hh / 2, Math.min(W, Hh) * .25, W / 2, Hh / 2, Math.hypot(W, Hh) * .62);
+  g.addColorStop(0, 'rgba(11,12,10,0)'); g.addColorStop(1, 'rgba(4,5,4,.78)');
+  v.fillStyle = g; v.fillRect(0, 0, W, Hh);
+  if (!grain) {
+    const gc = document.createElement('canvas'); gc.width = gc.height = 180;
+    const gx = gc.getContext('2d'), id = gx.createImageData(180, 180);
+    for (let i = 0; i < id.data.length; i += 4) { const n = Math.random() * 255; id.data[i] = id.data[i + 1] = id.data[i + 2] = n; id.data[i + 3] = 255; }
+    gx.putImageData(id, 0, 0); grain = ctx.createPattern(gc, 'repeat');
+  }
+  qRect = null;
+}
+function grid(cx, cy, z, sp, p, alpha, major) {
+  if (alpha <= .002) return;
+  const ze = base * Math.pow(z, p), px = sp * ze;
+  const fade = clamp((px - 7) / 16); if (fade <= 0) return;
+  const ox = cx * p, oy = cy * p;
+  const x0 = Math.floor((ox - W / 2 / ze) / sp), x1 = Math.ceil((ox + W / 2 / ze) / sp);
+  const y0 = Math.floor((oy - Hh / 2 / ze) / sp), y1 = Math.ceil((oy + Hh / 2 / ze) / sp);
+  for (const pass of [0, 1]) {
+    ctx.beginPath();
+    for (let i = x0; i <= x1; i++) { if ((i % major === 0) !== !!pass) continue; const x = Math.round(W / 2 + (i * sp - ox) * ze) + .5; ctx.moveTo(x, 0); ctx.lineTo(x, Hh); }
+    for (let j = y0; j <= y1; j++) { if ((j % major === 0) !== !!pass) continue; const y = Math.round(Hh / 2 + (j * sp - oy) * ze) + .5; ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.strokeStyle = `rgba(239,233,220,${(alpha * fade * (pass ? .11 : .05)).toFixed(4)})`; ctx.lineWidth = 1; ctx.stroke();
+  }
+}
+function drawBG(cx, cy, z) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = '#0b0c0a'; ctx.fillRect(0, 0, W, Hh);
+  if (S.dust > .01) {   // far layer
+    const p = .55, ze = base * Math.pow(z, p);
+    ctx.fillStyle = `rgba(239,233,220,${(.13 * S.dust).toFixed(3)})`;
+    for (const d of dust) {
+      const x = W / 2 + (d[0] - cx * p) * ze, y = Hh / 2 + (d[1] - cy * p) * ze;
+      if (x < -4 || y < -4 || x > W + 4 || y > Hh + 4) continue;
+      ctx.fillRect(x, y, d[2], d[2]);
+    }
+  }
+  grid(cx, cy, z, 40, .86, S.grid, 5);                 // drafting grid (mid layer)
+  grid(cx, cy, z, 40 / 3, .86, S.fine, 5);             // the canvas inside the circle
+  if (S.grid > .01) {                                   // artboard registration marks
+    const p = .86, ze = base * Math.pow(z, p);
+    ctx.strokeStyle = `rgba(239,233,220,${(.3 * S.grid * (1 - S.fine * .7)).toFixed(3)})`; ctx.beginPath();
+    for (const [mx, my] of [[-680, -400], [920, -400], [-680, 400], [920, 400]]) {
+      const x = W / 2 + (mx - cx * p) * ze, y = Hh / 2 + (my - cy * p) * ze;
+      ctx.moveTo(x - 9, y); ctx.lineTo(x + 9, y); ctx.moveTo(x, y - 9); ctx.lineTo(x, y + 9);
+    }
+    ctx.stroke();
+  }
+  ctx.drawImage(vig, 0, 0, W, Hh);
+  ctx.globalAlpha = .045; ctx.fillStyle = grain; ctx.fillRect(0, 0, W, Hh); ctx.globalAlpha = 1;
+}
+
+/* ================================================================
+   World render
+   ================================================================ */
+const show = (e, o) => { e.style.opacity = o; e.style.display = o > .001 ? '' : 'none'; };
+let driftPos = 0, last = performance.now();
+function renderWorld(dt) {
+  // camera, with the slow orbit around the human circle (click 5)
+  const ob = S.orbit, amp = 95 * Math.sin(Math.PI * ob), ang = -2.4 + TAU * .85 * ob;
+  const cx = S.camX + amp * Math.cos(ang), cy = S.camY + amp * Math.sin(ang);
+  const z = S.camZ * (1 + .22 * Math.sin(Math.PI * ob));
+  cam.setAttribute('transform', `translate(${f2(W / 2)} ${f2(Hh / 2)}) scale(${(base * z).toFixed(5)}) translate(${f2(-cx)} ${f2(-cy)})`);
+  drawBG(cx, cy, z);
+  const inv = 1 / z;   // world units → constant on-screen size
+
+  // human circle
+  const hp = penF(S.hc);
+  handEl.setAttribute('d', hand.d(0, hp));
+  handTexEl.setAttribute('d', handTex.d(0, hp));
+  gHand.style.opacity = S.hcO;
+
+  // cursor
+  const start = hand.p[0], rest = [start[0] + 70, start[1] + 64];
+  let cp;
+  if (S.cleave > 0) { const e = hand.last(), k = E.inOut(S.cleave); cp = [e[0] + 90 * k, e[1] + 70 * k]; }
+  else if (S.hc > 0) cp = hand.at(hp);
+  else { const k = E.inOut(S.cpos); cp = [lerp(rest[0], start[0], k), lerp(rest[1], start[1], k)]; }
+  gCur.setAttribute('transform', `translate(${f2(cp[0])} ${f2(cp[1])}) scale(${(inv * 1.15).toFixed(4)})`);
+  show(gCur, S.cur * S.hcO);
+
+  // annotations
+  const a = S.ann;
+  show(gAnn, (a > 0 ? 1 : 0) * S.annO);
+  if (a > 0) {
+    idealEl.setAttribute('d', idealLine.d(0, E.inOut(seg(a, 0, .55))));
+    for (const [m, w0] of [[mMax, .3], [mMin, .42]]) {
+      const k = E.out(seg(a, w0, w0 + .25));
+      m.ln.setAttribute('x2', lerp(m.a[0], m.b[0], k)); m.ln.setAttribute('y2', lerp(m.a[1], m.b[1], k));
+      m.dot.style.opacity = k; m.t.style.opacity = seg(a, w0 + .15, w0 + .35);
+    }
+    const g = E.out(seg(a, .6, .85));
+    gapRing.setAttribute('r', lerp(40, 19, g)); gapRing.style.opacity = g; gapLbl.style.opacity = seg(a, .75, 1);
+  }
+  show(gMarks, (S.marks > 0 ? 1 : 0) * S.annO);
+  if (S.marks > 0) marks.forEach((fn, i) => fn(seg(S.marks, i * .17, i * .17 + .3)));
+
+  // AI point and guides
+  const fv = i => 1 - seg(S.gv, i / 7, (i + 1) / 7);
+  show(gAI, S.ai > 0 || S.pc > 0 ? 1 : 0);
+  gAI.style.opacity = S.rowO * (S.shape > 0 ? 1 : 1);
+  gPt.setAttribute('transform', `translate(${AX} 0) scale(${inv.toFixed(4)})`);
+  const breathe = .5 + .5 * Math.sin(performance.now() / 600);
+  ptGlow.style.opacity = S.ai * (.25 + .15 * breathe) * fv(6);
+  ptDot.style.opacity = S.ai * fv(6);
+  ptDot.setAttribute('r', lerp(12, 3.6, E.out(S.ai)));
+  guides.forEach((g, i) => {
+    const k = E.out(seg(S.gd, i * .06, .55 + i * .06)), grp = i < 2 ? 2 : i < 4 ? 1 : 0;
+    g.e.setAttribute('x2', AX + g.d[0] * g.len * k); g.e.setAttribute('y2', g.d[1] * g.len * k);
+    g.e.style.opacity = .5 * fv(grp) * (S.shape > 0 ? 0 : 1);
+  });
+  readA.style.opacity = seg(S.gd, .5, 1) * fv(4) * .85;
+  // the perfect circle
+  const pc = S.pc;
+  pcEl.setAttribute('d', S.shape > 0 ? '' : pcLine.d(0, pc));
+  const drawing = pc > 0 && pc < 1;
+  trails.forEach((t, i) => {
+    const t1 = pc - i * .012, t0 = t1 - .012;
+    t.setAttribute('d', drawing && t1 > 0 ? pcLine.d(Math.max(0, t0), t1) : '');
+    t.style.opacity = (1 - i / trails.length) * .8;
+  });
+  const head = pcLine.at(pc);
+  armEl.setAttribute('x2', head[0]); armEl.setAttribute('y2', head[1]);
+  armEl.style.opacity = (pc > 0 ? .4 : 0) * fv(5) * (S.shape > 0 ? 0 : 1);
+  gHead.setAttribute('transform', `translate(${f2(head[0])} ${f2(head[1])}) scale(${inv.toFixed(4)})`);
+  show(gHead, drawing ? 1 : 0);
+  ticks.forEach((t, i) => t.style.opacity = .32 * seg(pc, i / 48 - .01, i / 48 + .03) * fv(3) * (S.shape > 0 ? 0 : 1));
+  readB.textContent = S.close > .2 ? 'CLOSED  Δ 0.000' : 'θ ' + (pc * 360).toFixed(1).padStart(5, '0') + '°';
+  readB.style.opacity = (pc > 0 ? .85 : 0) * fv(4);
+  closeRing.setAttribute('r', lerp(4, 30, S.close)); closeRing.style.opacity = S.close > 0 && S.close < 1 ? (1 - S.close) : 0;
+
+  // labels
+  for (const [e, v] of [[lblH, S.lblH], [lblA, S.lblA]]) {
+    show(e, v);
+    e.style.letterSpacing = f2(lerp(.5, .2, E.out(v))) + 'em';
+    e.setAttribute('transform', `translate(0 ${f2((1 - v) * 14)})`);
+  }
+  lblH.style.opacity = S.lblH * Math.max(S.hcO, .0);
+
+  // circle → line → row
+  const sh = S.shape;
+  show(gRowM, sh > 0 ? S.rowO : 0);
+  if (sh > 0) {
+    const A = sh <= 1 ? mCircle : mLine, B = sh <= 1 ? mLine : mRow, k = sh <= 1 ? sh : sh - 1;
+    let d = '';
+    for (let i = 0; i < MN; i++) d += (i ? 'L' : 'M') + f2(lerp(A[i][0], B[i][0], k)) + ' ' + f2(lerp(A[i][1], B[i][1], k));
+    rowEl.setAttribute('d', d);
+    driftPos += dt * 105 * S.drift;
+    gRow.setAttribute('transform', `translate(${f2(-(driftPos % SP) * clamp(sh - 1))} 0)`);
+  }
+  show(gCtr, S.ctr * S.rowO);
+  ctrT.textContent = 'n = ' + String(Math.floor(driftPos / SP) + 1).padStart(4, '0');
+
+  // slide 3
+  show(heroEl, S.hero);
+  show(ringEl, S.ring > 0 && S.ring < 1 ? (1 - S.ring) * .55 : 0);
+  ringEl.setAttribute('r', R * (1 + S.ring * 9));
+  for (const o of all3) {
+    const p = seg(S[o.k], o.w[0], o.w[1]);
+    o.e.setAttribute('d', o.l.d(0, o.k === 'river' ? p : E.inOutSine(p)));
+    if (o.dotEl) { o.dotEl.style.opacity = seg(S[o.k], o.w[1] - .02, o.w[1] + .04); o.dotEl.setAttribute('r', 3.2 * 3 * inv); }
+  }
+  const rv = seg(S.river, .97, 1);
+  riverEnd.style.opacity = rv; riverEnd.setAttribute('r', 4.2 * 3 * inv);
+  const pulse = (performance.now() / 1800) % 1;
+  riverRing.style.opacity = rv * (1 - pulse) * .7; riverRing.setAttribute('r', (4 + pulse * 16) * 3 * inv);
+  const gone = 1 - S.consO;
+  cons3.forEach((c, i) => {
+    const vis = 1 - seg(gone, i / cons3.length * .6, i / cons3.length * .6 + .4);
+    const p = seg(S[c.key], c.w[0], c.w[1]);
+    if (c.e) { c.e.setAttribute('d', c.l.d(0, E.out(p))); c.e.style.opacity = vis * .9; }
+    else c.t.style.opacity = p * vis;
+  });
+}
+
+/* ================================================================
+   Presenter HUD
+   ================================================================ */
+const hud = $('#hud');
+let hudPinned = false, hudTimer = 0;
+function renderHud() {
+  let html = `<span>${String(cur).padStart(2, '0')} / ${LAST}</span>`;
+  for (const s of [1, 2, 3]) {
+    html += '<span class="grp">';
+    STEPS.forEach((st, i) => { if (i && st.s === s) html += `<i class="${i === cur ? 'now' : i < cur ? 'done' : ''}" title="${st.n}"></i>`; });
+    html += '</span>';
+  }
+  hud.innerHTML = html;
+}
+function pokeHud() { hud.classList.add('on'); clearTimeout(hudTimer); if (!hudPinned) hudTimer = setTimeout(() => hud.classList.remove('on'), 2200); }
+
+/* ================================================================
+   Input
+   ================================================================ */
+addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = e.key;
+  if (['ArrowRight', 'ArrowDown', ' ', 'PageDown', 'Enter', 'n', 'N'].includes(k)) { e.preventDefault(); ac(); go(cur + 1); }
+  else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace', 'p', 'P'].includes(k)) { e.preventDefault(); go(cur - 1); }
+  else if (k === 'Home') jump(0);
+  else if (k === 'End') jump(LAST);
+  else if (k === '1' || k === '2' || k === '3') jump(SLIDE_START[k]);
+  else if (k === 'f' || k === 'F') { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); } catch (_) {} }
+  else if (k === 'm' || k === 'M') muted = !muted;
+  else if (k === 'h' || k === 'H') { hudPinned = !hudPinned; hud.classList.toggle('on', hudPinned); }
+  else if (k === '?' || k === '/') { const h = $('#help'); h.hidden = !h.hidden; }
+});
+addEventListener('pointerdown', e => { if (e.button === 0) { ac(); go(cur + 1); } });
+addEventListener('contextmenu', e => { e.preventDefault(); go(cur - 1); });
+addEventListener('mousemove', pokeHud);
+addEventListener('resize', resize);
+
+/* ================================================================
+   Boot
+   ================================================================ */
+resize();
+const hm = /^#step-(\d+)$/.exec(location.hash);
+if (hm) jump(+hm[1]); else renderHud();
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  tick(now);
+  renderWorld(dt);
+  renderType();
+  requestAnimationFrame(frame);
+}
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { qRect = null; });
+requestAnimationFrame(frame);
+window.__deck = { go, jump, S, get cur() { return cur; } };
+})();
+</script>
