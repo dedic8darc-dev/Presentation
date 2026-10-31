@@ -595,12 +595,15 @@ svg .stroke-accent{stroke:var(--eyebrow)}
 .g-row>p{font-size:24px;font-weight:700;color:var(--heading)}
 .g-track{position:relative;height:40px}
 .g-grid{position:absolute;left:384px;top:34px;bottom:0;width:1280px;pointer-events:none;
-  background:linear-gradient(90deg,rgb(var(--p-aqua-rgb) / .07) 0 calc(100%/3),transparent calc(100%/3) calc(200%/3),rgb(var(--p-aqua-rgb) / .07) calc(200%/3)),
-  repeating-linear-gradient(90deg,rgb(var(--p-deep-rgb) / .08) 0 1px,transparent 1px calc(1280px/15));border-radius:8px}
+  background:repeating-linear-gradient(135deg,rgb(var(--p-aqua-rgb) / .13) 0 6px,transparent 6px 16px) right top/256px 100% no-repeat,
+  repeating-linear-gradient(90deg,rgb(var(--p-aqua-rgb) / .07) 0 256px,transparent 256px 512px) left top/1024px 100% no-repeat,
+  repeating-linear-gradient(90deg,rgb(var(--p-deep-rgb) / .12) 0 1px,transparent 1px 256px);border-radius:8px}
+.g-bar.ghost{background:rgb(var(--p-aqua-rgb) / .08);border:2px dashed var(--accent-on-light);box-sizing:border-box}
 .g-bar{position:absolute;top:0;height:40px;border-radius:8px 3px 8px 8px;background:linear-gradient(90deg,var(--p-deep-sea),#14506F)}
 .g-bar.aq{background:linear-gradient(90deg,var(--p-aqua-ink),var(--p-shrimp-aqua))}
-.g-days{display:grid;grid-template-columns:repeat(15,1fr)}
-.g-days span{font-size:20px;color:var(--text-muted);font-variant-numeric:tabular-nums}
+.g-days{display:grid;grid-template-columns:repeat(5,1fr)}
+.g-days span{font-size:20px;font-weight:800;letter-spacing:2px;color:var(--text-strong);padding-left:10px}
+.g-days span.buf{color:var(--accent-on-light)}
 .g-days span.wk{color:var(--text-strong);font-weight:800}
 .gate{position:absolute;top:4px;width:32px;height:32px;margin-left:-16px}
 .gate i{display:block;width:22px;height:22px;margin:5px;background:var(--grad-brand);transform:rotate(45deg);border-radius:4px;box-shadow:0 0 0 5px rgb(var(--p-aqua-rgb) / .15)}
@@ -1483,32 +1486,32 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
 <section class="slide light" data-title="Roadmap" data-sky="day" data-hz="1060,30,.25" style="gap:30px">
   <div class="topbar"></div>
   <p class="eyebrow r">Roadmap</p>
-  <h2 class="title rc">Three weeks, <span class="grad">five quick sign-offs.</span></h2>
+  <h2 class="title rc">4-5 weeks, <span class="grad">five quick sign-offs.</span></h2>
   <div class="gantt">
     <div class="g-grid rf" aria-hidden="true"></div>
     <i class="sweep" aria-hidden="true"></i>
-    <div class="g-row r"><span></span><div class="g-days"><span>D1</span><span>D2</span><span>D3</span><span>D4</span><span class="wk">D5</span><span>D6</span><span>D7</span><span>D8</span><span>D9</span><span class="wk">D10</span><span>D11</span><span>D12</span><span>D13</span><span>D14</span><span class="wk">D15</span></div></div>
+    <div class="g-row r"><span></span><div class="g-days"><span>WEEK 1</span><span>WEEK 2</span><span>WEEK 3</span><span>WEEK 4</span><span class="buf">WEEK 5 · BUFFER</span></div></div>
     <div style="display:flex;flex-direction:column;gap:8px;--stagger:120ms">
-      <div class="g-row"><p class="r" data-s="1">Discover</p><div class="g-track"><i class="g-bar rd" data-s="1" style="left:0;width:171px"></i></div></div>
-      <div class="g-row"><p class="r" data-s="1">Brand platform · Gate 1</p><div class="g-track"><i class="g-bar rd" data-s="1" style="left:85px;width:256px"></i></div></div>
-      <div class="g-row"><p class="r" data-s="1">Identity · Gate 2</p><div class="g-track"><i class="g-bar rd" data-s="1" style="left:256px;width:427px"></i></div></div>
-      <div class="g-row"><p class="r" data-s="1">UX and UI · Gates 3-4</p><div class="g-track"><i class="g-bar aq rd" data-s="1" style="left:256px;width:597px"></i></div></div>
-      <div class="g-row"><p class="r" data-s="1">Build and content</p><div class="g-track"><i class="g-bar aq rd" data-s="1" style="left:597px;width:597px"></i></div></div>
-      <div class="g-row"><p class="r" data-s="1">Languages, hosting, SEO</p><div class="g-track"><i class="g-bar aq rd" data-s="1" style="left:853px;width:341px"></i></div></div>
-      <div class="g-row"><p class="r" data-s="1">QA and launch · Gate 5</p><div class="g-track"><i class="g-bar rd" data-s="1" style="left:1109px;width:171px"></i></div></div>
+      <div class="g-row"><p class="r" data-s="1">Discover</p><div class="g-track"><i class="g-bar rd" data-s="1" style="left:0;width:154px"></i></div></div>
+      <div class="g-row"><p class="r" data-s="1">Brand platform · Gate 1</p><div class="g-track"><i class="g-bar rd" data-s="1" style="left:102px;width:154px"></i></div></div>
+      <div class="g-row"><p class="r" data-s="1">Identity · Gate 2</p><div class="g-track"><i class="g-bar rd" data-s="1" style="left:205px;width:307px"></i></div></div>
+      <div class="g-row"><p class="r" data-s="1">UX and UI · Gates 3-4</p><div class="g-track"><i class="g-bar aq rd" data-s="1" style="left:256px;width:512px"></i></div></div>
+      <div class="g-row"><p class="r" data-s="1">Build and content</p><div class="g-track"><i class="g-bar aq rd" data-s="1" style="left:563px;width:461px"></i></div></div>
+      <div class="g-row"><p class="r" data-s="1">Languages, hosting, SEO</p><div class="g-track"><i class="g-bar aq rd" data-s="1" style="left:768px;width:256px"></i></div></div>
+      <div class="g-row"><p class="r" data-s="1">QA and launch · Gate 5</p><div class="g-track"><i class="g-bar rd" data-s="1" style="left:922px;width:102px"></i><i class="g-bar ghost rd" data-s="1" style="left:1024px;width:256px"></i></div></div>
     </div>
     <div class="g-row" style="--stagger:150ms"><p class="r" data-s="2" style="color:var(--accent-on-light)">Sign-off gates</p><div class="g-track g-gates">
-      <span class="gate rp" data-s="2" style="left:341px"><i></i><span>DAY 4</span></span>
-      <span class="gate rp" data-s="2" style="left:512px"><i></i><span>DAY 6</span></span>
-      <span class="gate rp" data-s="2" style="left:683px"><i></i><span>DAY 8</span></span>
-      <span class="gate rp" data-s="2" style="left:853px"><i></i><span>DAY 10</span></span>
-      <span class="gate rp" data-s="2" style="left:1262px"><i></i><span style="left:auto;right:0;transform:none">DAY 15</span></span>
+      <span class="gate rp" data-s="2" style="left:256px"><i></i><span>WEEK 1</span></span>
+      <span class="gate rp" data-s="2" style="left:512px"><i></i><span>WEEK 2</span></span>
+      <span class="gate rp" data-s="2" style="left:640px"><i></i><span>WEEK 3</span></span>
+      <span class="gate rp" data-s="2" style="left:768px"><i></i><span>WEEK 3</span></span>
+      <span class="gate rp" data-s="2" style="left:1024px"><i></i><span>WEEK 4-5</span></span>
     </div></div>
     <div class="g-row" style="margin-top:6px"><p class="r" data-s="3">Photo and film tour</p><div class="g-track"><div class="g-photo rf" data-s="3"><svg viewBox="0 0 1280 40" preserveAspectRatio="none"><rect x="1.5" y="1.5" width="1277" height="37" rx="8" vector-effect="non-scaling-stroke"/></svg><p>Own schedule, set with the photographer</p></div></div></div>
   </div>
-  <p class="lead r" data-s="3" style="line-height:1.35"><b>Photo and film</b> sits outside the three weeks. The site is built with image slots, so real pictures drop in when the shoot is done.</p>
+  <p class="lead r" data-s="3" style="line-height:1.35"><b>Photo and film</b> sits outside the build weeks. The site is built with image slots, so real pictures drop in when the shoot is done.</p>
   <div class="foot"><p>INDICATIVE · DETAILED ROADMAP SHARED SEPARATELY</p><p class="sig">DEDICATED BEING</p></div>
-  <aside class="note">Fifteen working days from kick-off, five sign-off gates on days 4, 6, 8, 10 and 15. It holds only if each sign-off comes within 24 hours and the product data, certificates and logo files arrive in week 1. Photo and film follows the photographer’s plan and availability. Click 1: the work bars draw while a marker sweeps the 15 days. Click 2: the gates. Click 3: photo and film.</aside>
+  <aside class="note">Four to five weeks from kick-off: the work is planned to finish in week 4, and week 5 is a buffer for feedback and launch. Five sign-off gates: end of week 1, end of week 2, two in week 3, and launch in week 4 or 5. It holds only if each sign-off comes within 24 hours and the product data, certificates and logo files arrive in week 1. Photo and film follows the photographer’s plan and availability. Click 1: the work bars draw while a marker sweeps the five weeks. Click 2: the gates. Click 3: photo and film.</aside>
 </section>
 
 <!-- 27 · decisions -->
