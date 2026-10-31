@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0&icon_names=ac_unit,add_shopping_cart,admin_panel_settings,animation,app_registration,apps,back_hand,bolt,calendar_month,campaign,category,cloud_done,contrast,conveyor_belt,description,download,draw,event_available,format_quote,forward_to_inbox,groups,insights,inventory_2,join,language,lock,movie,my_location,payments,photo_camera,photo_library,public,receipt_long,replay,request_quote,route,sailing,sell,set_meal,shield,shopping_basket,signpost,storefront,touch_app,translate,trending_down,verified,verified_user,view_agenda,waves,workspace_premium&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0&icon_names=ac_unit,add_shopping_cart,admin_panel_settings,animation,app_registration,apps,back_hand,bolt,calendar_month,campaign,category,chat,cloud_done,contrast,conveyor_belt,description,download,draw,event_available,format_quote,forward_to_inbox,groups,insights,inventory_2,join,language,lock,mail,movie,my_location,payments,photo_camera,photo_library,public,receipt_long,replay,request_quote,route,sailing,sell,set_meal,shield,shopping_basket,signpost,storefront,touch_app,translate,trending_down,verified,verified_user,view_agenda,waves,workspace_premium&display=block">
 <style>
 /* Concept: one continuous day on Oceanfresh's shore. A single living sea (WebGL) runs under the whole deck and
    moves from pre-dawn, through sunrise and lagoon, into daylight, golden hour and night. The horizon line from the
@@ -251,7 +251,7 @@ svg .stroke-accent{stroke:var(--eyebrow)}
 /* research */
 .proofs{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .proof{flex-direction:row;gap:24px;align-items:flex-start;padding:28px}
-.stats{display:grid;grid-template-columns:1.25fr 1fr 1fr .8fr;gap:24px}
+.stats{display:grid;grid-template-columns:1.3fr 1.2fr 1fr;gap:24px}
 .stat{padding:28px;gap:10px;justify-content:space-between}
 .stat .fig{font-size:76px}
 .pill{display:inline-flex;align-items:center;gap:8px;font:500 20px var(--font-mono);letter-spacing:.08em;color:var(--p-deep-navy);background:var(--grad-brand-light);border-radius:999px;padding:6px 14px;align-self:flex-start}
@@ -631,6 +631,96 @@ svg .stroke-accent{stroke:var(--eyebrow)}
 .close-foot{display:flex;justify-content:space-between;align-items:center}
 .close-foot p{font-size:28px;color:var(--text-muted-on-dark)}
 
+/* hero preview (sample website) */
+.demo{position:relative;height:600px;border-radius:22px 8px 22px 22px;overflow:hidden;border:1px solid var(--line);box-shadow:0 40px 80px -40px rgb(var(--p-deep-rgb) / .45);background:var(--p-ice)}
+.demo .chrome{position:absolute;left:0;right:0;top:0;height:40px;display:flex;align-items:center;gap:8px;padding:0 18px;background:var(--p-ice);border-bottom:1px solid var(--line);z-index:3}
+.demo .chrome i{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.demo .chrome .url{margin-left:14px;position:relative;height:24px;width:300px;font:500 15px/24px var(--font-mono);color:var(--text-muted)}
+.demo .chrome .url span{position:absolute;left:0;top:0;transition:opacity 300ms var(--ease-out)}
+.demo .hero{position:absolute;left:0;right:0;top:40px;bottom:0;overflow:hidden;transition:opacity 600ms var(--ease-out),transform 700ms var(--ease-out)}
+.demo .hero-g{background:linear-gradient(180deg,#0B2A3C 0%,#12506E 50%,#1A6F96 76%,#F4A98A 88%,#F7D6B4 100%)}
+.demo .hero-d{background:linear-gradient(160deg,#FFFFFF 0%,#EEF8F2 45%,#DDF1E3 100%)}
+.demo[data-mode=global] .hero-d,.demo[data-mode=direct] .hero-g{opacity:0;pointer-events:none}
+.demo[data-mode=global] .hero-d{transform:translateX(60px)}
+.demo[data-mode=direct] .hero-g{transform:translateX(-60px)}
+.demo .hero .waves{position:absolute;left:0;right:0;bottom:0;height:150px;overflow:hidden}
+.demo .hero .waves svg{position:absolute;left:0;bottom:0;width:200%;height:100%;animation:mq 26s linear infinite}
+.demo .hero .waves svg.w2{animation-duration:36s;opacity:.6}
+.demo .hero-g .sun{position:absolute;right:300px;bottom:110px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#FFF4DF,#F8C99A 55%,rgb(248 201 154 / 0) 72%);animation:floaty 8s var(--ease-wave) infinite}
+.demo .hero-d .art{position:absolute;right:0;top:0;bottom:0;width:640px;overflow:hidden}
+.demo .hero-d .art svg{position:absolute;inset:0;width:100%;height:100%;-webkit-mask:linear-gradient(90deg,transparent,#000 40%);mask:linear-gradient(90deg,transparent,#000 40%)}
+.demo .hero-d .art .mark{position:absolute;right:150px;top:150px;width:240px;height:214px;animation:floaty 6s var(--ease-wave) infinite}
+.demo .site{position:absolute;left:0;right:0;top:40px;height:84px;display:flex;align-items:center;gap:28px;padding:0 44px;z-index:2;transition:color 500ms var(--ease-out)}
+.demo[data-mode=global] .site{color:var(--p-ice)}
+.demo[data-mode=direct] .site{color:var(--text-strong)}
+.demo .brand{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:900;letter-spacing:2px}
+.demo .brand .logo-symbol{width:44px;height:40px}
+.demo .brand small{font-size:15px;font-weight:700;letter-spacing:3px;opacity:.75}
+.demo .nav{position:relative;flex:1;height:30px}
+.demo .nav span{position:absolute;left:0;top:0;display:flex;gap:26px;font-size:18px;font-weight:600;white-space:nowrap;transition:opacity 400ms var(--ease-out)}
+.demo[data-mode=global] .nav .nd,.demo[data-mode=direct] .nav .ng,.demo[data-mode=global] .url .ud,.demo[data-mode=direct] .url .ug,.demo[data-mode=global] .sw-d,.demo[data-mode=direct] .sw-g{opacity:0}
+.demo .lang{display:inline-flex;align-items:center;gap:6px;font-size:17px;font-weight:700;opacity:.85}
+.demo .lang .ms{font-size:22px}
+.demo-toggle{position:relative;display:inline-flex;padding:4px;border-radius:999px;border:1px solid rgb(var(--p-white-rgb) / .35);background:rgb(var(--p-white-rgb) / .12);cursor:pointer;font:inherit;color:inherit;
+  transition:background-color 400ms var(--ease-out),border-color 400ms var(--ease-out)}
+.demo[data-mode=direct] .demo-toggle{background:var(--p-white);border-color:var(--line)}
+.demo-toggle:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.demo-toggle .opt{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:128px;height:40px;font-size:18px;font-weight:800;transition:color 350ms var(--ease-out)}
+.demo-toggle .knob{position:absolute;left:4px;top:4px;width:128px;height:40px;border-radius:999px;background:var(--p-white);transition:transform 380ms var(--ease-in-out),background-color 380ms var(--ease-out)}
+.demo[data-mode=global] .demo-toggle .o-g{color:var(--text-strong)}
+.demo[data-mode=global] .demo-toggle .o-d{color:var(--p-ice)}
+.demo[data-mode=direct] .demo-toggle .knob{transform:translateX(128px);background:var(--p-deep-sea)}
+.demo[data-mode=direct] .demo-toggle .o-g{color:var(--text-strong)}
+.demo[data-mode=direct] .demo-toggle .o-d{color:var(--p-ice)}
+@media (hover:hover) and (pointer:fine){.demo-toggle:hover{border-color:var(--accent)}}
+.demo-toggle:active .knob{transform:scale(.97)}
+.demo[data-mode=direct] .demo-toggle:active .knob{transform:translateX(128px) scale(.97)}
+.demo .sbtn{display:inline-flex;align-items:center;gap:8px;font-size:18px;font-weight:800;border-radius:999px;padding:11px 22px;white-space:nowrap;background:var(--cta);color:var(--p-ink-900)}
+.demo .swap{position:relative;display:grid}
+.demo .swap>*{grid-area:1/1;transition:opacity 400ms var(--ease-out)}
+.demo .copy{position:absolute;left:96px;top:150px;width:1150px;display:flex;flex-direction:column;gap:18px}
+.demo .copy .eb{font-size:18px;font-weight:800;letter-spacing:4px;display:flex;align-items:center;gap:12px}
+.demo .copy h1{font-size:84px;font-weight:900;line-height:1;letter-spacing:-3px;white-space:nowrap}
+.demo .copy .sub{font-size:28px;line-height:1.35;font-weight:600}
+.demo .copy .ctas{display:flex;gap:14px;margin-top:6px}
+.demo .copy .ghost{display:inline-flex;align-items:center;gap:8px;font-size:20px;font-weight:800;border-radius:999px;padding:14px 26px;white-space:nowrap}
+.demo .copy .cta{display:inline-flex;align-items:center;gap:8px;font-size:20px;font-weight:800;border-radius:999px;padding:14px 26px;white-space:nowrap;background:var(--cta);color:var(--p-ink-900)}
+.demo .hero-g .copy{color:var(--p-ice)}
+.demo .hero-g .eb{color:var(--p-aqua-light)}
+.demo .hero-g .ghost{border:1px solid rgb(var(--p-white-rgb) / .5);color:var(--p-ice)}
+.demo .hero-d .copy{color:var(--text-strong)}
+.demo .hero-d .eb{color:var(--fresh-on-light)}
+.demo .hero-d .sub{color:var(--text-body)}
+.demo .hero-d .ghost{border:1px solid var(--line);background:var(--p-white);color:var(--text-strong)}
+.demo .strip{position:absolute;left:96px;bottom:34px;display:flex;gap:10px}
+.demo .strip span{font-size:17px;font-weight:700;border-radius:999px;padding:8px 16px}
+.demo .hero-g .strip span{background:rgb(var(--p-navy-rgb) / .55);color:var(--p-ice);border:1px solid rgb(var(--p-white-rgb) / .2)}
+.demo .hero-d .strip span{background:var(--p-white);color:var(--text-strong);border:1px solid var(--line)}
+.demo .copy>*{transition:opacity 600ms var(--ease-out),transform 700ms var(--ease-out)}
+.demo .hero .copy>*{transition-delay:calc(var(--k,0) * 80ms + 120ms)}
+.demo[data-mode=global] .hero-d .copy>*,.demo[data-mode=direct] .hero-g .copy>*{opacity:0;transform:translateY(18px);transition-delay:0ms}
+.demo-hint{display:flex;align-items:center;gap:12px}
+
+/* customer view */
+.cx{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.cxp{padding:34px 38px;gap:14px;overflow:hidden}
+.cxp .bigicon{position:absolute;right:-40px;top:-50px;font-size:280px;opacity:.12;pointer-events:none}
+.cxp .head{display:flex;align-items:center;gap:18px}
+.cxp .head .icon-tile{width:64px;height:64px}
+.cxp .head .icon-tile .ms{font-size:36px}
+.cxp .who{font-size:34px;font-weight:900;letter-spacing:-.5px;color:var(--strong);line-height:1.1}
+.cxp .rows{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.cxp .rowi{display:flex;align-items:center;gap:16px;font-size:25px;line-height:1.3;color:var(--body);padding:7px 0}
+.cxp .rowi .ms{font-size:30px;color:var(--eyebrow);flex:none;width:34px}
+.cxp .rowi b{color:var(--strong)}
+.cxp .chan{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
+.cxp .chan .label{margin-right:4px}
+.cx-g{background:linear-gradient(150deg,#1A6F96 0%,var(--p-deep-sea) 55%,var(--p-deep-navy) 100%);border:none;color:var(--text-on-dark);
+  --strong:var(--text-on-dark);--body:var(--text-on-dark);--muted:var(--text-muted-on-dark);--eyebrow:var(--accent-on-dark);--chip-bg:rgb(var(--p-white-rgb) / .1);--chip-border:1px solid rgb(var(--p-white-rgb) / .22)}
+.cx-d{background:linear-gradient(150deg,#FFFFFF 0%,#EEF8F2 55%,#DDF1E3 100%)}
+.cxp .chan.in .chip:nth-of-type(2){position:relative}
+.cxp .chan.in .chip:nth-of-type(2)::after{content:"";position:absolute;inset:-6px;border-radius:999px;box-shadow:0 0 0 3px var(--accent);opacity:0;animation:pulse 2.8s var(--ease-wave) 900ms infinite}
+
 /* ---------- Presenter chrome ---------- */
 #progress{position:fixed;left:0;bottom:0;height:3px;width:100%;background:var(--grad-brand);transform-origin:left center;transform:scaleX(0);transition:transform 600ms var(--ease-out);z-index:5}
 #counter{position:fixed;right:max(20px,env(safe-area-inset-right,0px));bottom:14px;font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;color:var(--text-muted-on-dark);z-index:5;opacity:.8;transition:color 600ms var(--ease-wave)}
@@ -706,12 +796,12 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
 <!-- 2 · today -->
 <section class="slide dark-pad" data-title="Where we are" data-sky="deep" data-hz="1040,40,.5" style="gap:32px">
   <p class="eyebrow r">Where we are</p>
-  <h2 class="title"><span class="ln rc">Twenty years strong.</span><span class="ln rc"><span class="grad">Ready for the next twenty.</span></span></h2>
+  <h2 class="title"><span class="ln rc">Thirty years strong.</span><span class="ln rc"><span class="grad">Ready for the next thirty.</span></span></h2>
   <div class="today-grid">
     <div style="display:flex;flex-direction:column;gap:20px">
       <p class="label r" data-s="1">What Oceanfresh has built</p>
       <div class="facts">
-        <div class="card fact r" data-s="1"><p class="fig grad"><span class="count" data-to="20">20</span></p><p class="small">years in seafood export, two generations</p></div>
+        <div class="card fact r" data-s="1"><p class="fig grad"><span class="count" data-to="30">30</span></p><p class="small">years in seafood export, two generations</p></div>
         <div class="card fact r" data-s="2"><div style="display:flex;align-items:center;gap:16px"><div class="ring"><svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="42"/><circle class="fg draw" data-s="2" pathLength="1" style="--delay:150ms" cx="50" cy="50" r="42"/></svg></div><p class="fig grad" style="font-size:56px"><span class="count" data-to="100" data-suf="%">100%</span></p></div><p class="small">pre-shipment QC and supervised loading</p></div>
         <div class="card fact r" data-s="3"><p class="fig grad" style="font-size:72px">India</p><p class="small">A network of units, farmers and fishermen across India</p></div>
       </div>
@@ -753,7 +843,7 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
       <div class="card add r" data-s="5"><i class="ms">shopping_basket</i><p>Online ordering for Indian buyers</p></div>
     </div>
   </div>
-  <aside class="note">The current website has served Oceanfresh well since 2021. The business has grown, and buyers now expect more online. Phase 1 brings the brand and website up to the level of the business. Clicks: 20 years, 100% QC, the network across India, the routes to buyers, then what the next step adds.</aside>
+  <aside class="note">The current website has served Oceanfresh well since 2021. The business has grown, and buyers now expect more online. Phase 1 brings the brand and website up to the level of the business. Clicks: 30 years, 100% QC, the network across India, the routes to buyers, then what the next step adds.</aside>
 </section>
 
 <!-- 3 · research -->
@@ -768,11 +858,10 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
   <div class="stats">
     <div class="card stat r" data-s="2"><span class="pill">RECORD</span><p class="fig grad"><span class="count" data-to="8.46" data-dec="2" data-pre="$" data-suf="B">$8.46B</span></p><p class="caption">India seafood exports, FY 2025-26</p></div>
     <div class="card stat r" data-s="3"><div class="statrow"><svg class="donut" viewBox="0 0 120 120" aria-hidden="true" style="transform:rotate(-90deg)"><circle cx="60" cy="60" r="50" stroke="rgb(255 255 255 / .12)"/><circle class="draw" data-s="3" cx="60" cy="60" r="50" pathLength="1" stroke="url(#gBrandL)" stroke-linecap="round" style="--delay:150ms"/></svg><p class="fig" style="font-size:60px"><span class="count" data-to="66.5" data-dec="1" data-suf="%">66.5%</span></p></div><p class="caption">of that value from frozen shrimp</p></div>
-    <div class="card stat r" data-s="4"><div class="statrow"><i class="ms trend">trending_down</i><p class="fig" style="font-size:60px"><span class="count" data-to="14.2" data-dec="1" data-pre="−" data-suf="%">−14.2%</span></p></div><p class="caption">US value, year on year</p></div>
-    <div class="card stat rp" data-s="5"><p class="fig grad">#1</p><p class="caption">China, by volume</p></div>
+    <div class="card stat rp" data-s="4"><p class="fig grad">#1</p><p class="caption">China, by volume</p></div>
   </div>
   <p class="caption r" style="position:absolute;left:128px;bottom:64px;letter-spacing:3px;font-weight:700;font-size:22px">SOURCE: MPEDA, 1 JUNE 2026</p>
-  <aside class="note">Markets are shifting away from the US toward China, the EU and Southeast Asia. That is why the site must speak more than one language, and why proof must be on the page. Clicks: the three proofs, then $8.46B, 66.5%, minus 14.2%, and China number one.</aside>
+  <aside class="note">Markets are moving toward China, the EU and Southeast Asia. That is why the site must speak more than one language, and why proof must be on the page. Clicks: the three proofs, then $8.46B, 66.5%, and China number one.</aside>
 </section>
 
 <!-- 4 · insight -->
@@ -791,7 +880,7 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
   <p class="eyebrow r">The insight</p>
   <h2 class="insight-title" style="--stagger:260ms;max-width:1150px"><span class="ln rc">A buyer in Rotterdam</span><span class="ln rc">can’t stand on the</span><span class="ln rc">harbour in India.</span></h2>
   <p class="insight-turn r" data-s="1" style="--delay:450ms"><span class="grad">Oceanfresh already does. Every day.</span></p>
-  <p class="body r" data-s="2" style="max-width:1100px;color:var(--text-muted-on-dark)">For twenty years Oceanfresh has been its buyers’ eyes and ears in India. That is the brand. Phase 1 makes it visible.</p>
+  <p class="body r" data-s="2" style="max-width:1100px;color:var(--text-muted-on-dark)">For thirty years Oceanfresh has been its buyers’ eyes and ears in India. That is the brand. Phase 1 makes it visible.</p>
   <aside class="note">Rotterdam is only an example of a far-away buyer. The point: buyers depend on someone they trust being physically present at the source. Oceanfresh is that someone. The first light of dawn appears here. Let the headline land, pause, then click for “Oceanfresh already does.”</aside>
 </section>
 
@@ -868,7 +957,7 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
       <p class="caption r" data-s="1">Rule: if a word can go, it goes. Lines subject to trademark check.</p>
     </div>
     <div class="vstack">
-      <div class="card vrow rr" data-s="2"><i class="ms">workspace_premium</i><div><p class="label">Proof strip</p><p class="v">20 years. 2 generations. 100% pre-shipment QC.</p></div></div>
+      <div class="card vrow rr" data-s="2"><i class="ms">workspace_premium</i><div><p class="label">Proof strip</p><p class="v">30 years. 2 generations. 100% pre-shipment QC.</p></div></div>
       <div class="card vrow rr" data-s="2"><i class="ms">verified</i><div><p class="label">Quality</p><p class="v">Every carton. Shore-Checked.</p></div></div>
       <div class="card vrow rr" data-s="2"><i class="ms">campaign</i><div><p class="label">Market updates</p><p class="v">Hear it from the shore first.</p></div></div>
       <div class="card vrow rr" data-s="2"><i class="ms">touch_app</i><div><p class="label">Calls to action</p><p class="v">Request a quote · Get the spec sheet</p></div></div>
@@ -1018,6 +1107,86 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
   <aside class="note">Global and Direct are plain English words that work in every market and language. They name the buyer relationship, not a country. Name subject to domain and trademark check. Click 1: the doors swing open. Click 2: the toggle.</aside>
 </section>
 
+<!-- 16 · hero preview -->
+<section class="slide light" data-title="Hero preview" data-sky="day" data-hz="1060,30,.25" style="gap:32px">
+  <div class="topbar"></div>
+  <p class="eyebrow r">Sample · The two doors, live</p>
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px">
+    <h2 class="title rc">One click <span class="grad">between the doors.</span></h2>
+    <p class="caption r demo-hint" style="--delay:300ms"><i class="ms" style="font-size:30px;color:var(--accent-on-light)">touch_app</i>Click the toggle in the header, or press T</p>
+  </div>
+  <div class="demo rz" data-mode="global" style="--delay:200ms"><i class="rf" data-s="1" hidden></i>
+    <div class="chrome" aria-hidden="true"><i></i><i></i><i></i><div class="url"><span class="ug">oceanfresh · global</span><span class="ud">oceanfresh · direct</span></div></div>
+    <div class="hero hero-g" aria-hidden="false">
+      <i class="sun" aria-hidden="true"></i><div class="waves" aria-hidden="true"><svg class="w2" viewBox="0 0 1200 150" preserveAspectRatio="none"><path d="M0 60 Q150 30 300 60 T600 60 T900 60 T1200 60 V150 H0Z" fill="#1A6F96"/></svg><svg viewBox="0 0 1200 150" preserveAspectRatio="none"><path d="M0 95 Q150 65 300 95 T600 95 T900 95 T1200 95 V150 H0Z" fill="#0B2A3C"/></svg></div>
+      <div class="copy">
+        <p class="eb" style="--k:0">OCEANFRESH GLOBAL</p>
+        <h1 style="--k:1">Your shore in India.</h1>
+        <p class="sub" style="--k:2">Close to the catch. Close to you.</p>
+        <div class="ctas" style="--k:3"><span class="cta"><i class="ms" style="font-size:22px">request_quote</i>Request a quote</span><span class="ghost"><i class="ms" style="font-size:22px">download</i>Get the spec sheet</span></div>
+      </div>
+      <div class="strip"><span>30 years</span><span>2 generations</span><span>100% pre-shipment QC</span></div>
+    </div>
+    <div class="hero hero-d" aria-hidden="true">
+      <div class="art" aria-hidden="true"><svg class="shards" viewBox="0 0 640 560" preserveAspectRatio="xMidYMid slice"></svg><div class="mark logo-symbol"></div></div>
+      <div class="copy">
+        <p class="eb" style="--k:0">OCEANFRESH DIRECT <svg class="flag" aria-hidden="true" width="27" height="18" viewBox="0 0 72 48"><rect width="72" height="16" fill="#FF9933"/><rect y="16" width="72" height="16" fill="#FFFFFF"/><rect y="32" width="72" height="16" fill="#138808"/><circle cx="36" cy="24" r="6" fill="none" stroke="#000080" stroke-width="2"/></svg></p>
+        <h1 style="--k:1">Straight from our shore.</h1>
+        <p class="sub" style="--k:2">Wholesale only. For verified Indian businesses.</p>
+        <div class="ctas" style="--k:3"><span class="cta"><i class="ms" style="font-size:22px">app_registration</i>Register</span><span class="ghost"><i class="ms" style="font-size:22px">chat</i>WhatsApp ordering</span></div>
+      </div>
+      <div class="strip"><span>Register</span><span>Approved</span><span>Prices</span><span>Order</span><span>Reorder</span></div>
+    </div>
+    <div class="site">
+      <div class="brand"><div class="logo-symbol" aria-hidden="true"></div>OCEANFRESH <small class="swap"><span class="sw-g">GLOBAL</span><span class="sw-d">DIRECT</span></small></div>
+      <div class="nav" aria-hidden="true"><span class="ng">Products<b style="font-weight:600;color:inherit">How we work</b>Quality<b style="font-weight:600;color:inherit">Markets</b>Market updates</span><span class="nd">Products<b style="font-weight:600;color:inherit">Prices</b>Orders<b style="font-weight:600;color:inherit">Reorder</b></span></div>
+      <span class="lang" aria-hidden="true"><i class="ms">translate</i>EN</span>
+      <button class="demo-toggle" type="button" aria-pressed="false" aria-label="Switch between Oceanfresh Global and Oceanfresh Direct"><i class="knob" aria-hidden="true"></i><span class="opt o-g">Global</span><span class="opt o-d">Direct <svg class="flag" aria-hidden="true" width="27" height="18" viewBox="0 0 72 48"><rect width="72" height="16" fill="#FF9933"/><rect y="16" width="72" height="16" fill="#FFFFFF"/><rect y="32" width="72" height="16" fill="#138808"/><circle cx="36" cy="24" r="6" fill="none" stroke="#000080" stroke-width="2"/></svg></span></button>
+    </div>
+  </div>
+  <div class="foot"><p>OCEANFRESH · PHASE 1 · SAMPLE, NOT FINAL DESIGN</p><p class="sig">DEDICATED BEING</p></div>
+  <aside class="note">A quick taste of the website: the same header and toggle on both doors. Click the toggle in the header (or press T) to switch between Global and Direct as often as you like. If you only use the clicker, the next click switches to Direct for you, and the one after moves on. Sample layout only; final design comes in the UX and UI stage.</aside>
+</section>
+
+<!-- 17 · customer view -->
+<section class="slide light" data-title="What customers get" data-sky="day" data-hz="1060,30,.25" style="gap:32px">
+  <div class="topbar"></div>
+  <p class="eyebrow r">The customer view</p>
+  <h2 class="title rc">What every <span class="grad">customer gets.</span></h2>
+  <div class="cx">
+    <div class="card cxp cx-g rl" data-s="1" style="--stagger:90ms">
+      <i class="ms bigicon" aria-hidden="true">public</i>
+      <div class="head"><div class="icon-tile"><i class="ms">public</i></div><div><p class="label">Oceanfresh Global</p><p class="who">International buyers</p></div></div>
+      <div class="rows">
+        <div class="rowi rl" data-s="1"><i class="ms">conveyor_belt</i><span><b>See the process:</b> source, check, pack, ship, on film</span></div>
+        <div class="rowi rl" data-s="1"><i class="ms">set_meal</i><span><b>Browse every product</b> with full specs</span></div>
+        <div class="rowi rl" data-s="1"><i class="ms">workspace_premium</i><span><b>Certificates</b> shown with their numbers</span></div>
+        <div class="rowi rl" data-s="1"><i class="ms">download</i><span><b>Spec sheet PDF</b> to forward to their QA team</span></div>
+        <div class="rowi rl" data-s="1"><i class="ms">request_quote</i><span><b>Enquire</b> or build one quote for several products</span></div>
+        <div class="rowi rl" data-s="1"><i class="ms">chat</i><span><b>Order directly</b> on WhatsApp and email</span></div>
+        <div class="rowi rl" data-s="1"><i class="ms">translate</i><span><b>Read it all</b> in their own language</span></div>
+      </div>
+      <div class="chan r" data-s="1"><p class="label">Enquire on</p><span class="chip"><i class="ms">language</i>Website</span><span class="chip"><i class="ms">chat</i>WhatsApp</span><span class="chip"><i class="ms">mail</i>Email</span></div>
+    </div>
+    <div class="card cxp cx-d rr" data-s="2" style="--stagger:90ms">
+      <i class="ms bigicon" aria-hidden="true" style="color:var(--fresh)">storefront</i>
+      <div class="head"><div class="icon-tile"><i class="ms">storefront</i></div><div><p class="label">Oceanfresh Direct</p><div style="display:flex;align-items:center;gap:14px"><p class="who">Indian wholesalers</p><svg class="flag" aria-label="India flag icon" width="42" height="28" viewBox="0 0 72 48"><rect width="72" height="16" fill="#FF9933"/><rect y="16" width="72" height="16" fill="#FFFFFF"/><rect y="32" width="72" height="16" fill="#138808"/><circle cx="36" cy="24" r="6" fill="none" stroke="#000080" stroke-width="2"/><rect x=".5" y=".5" width="71" height="47" fill="none" stroke="#D0D8D8"/></svg></div></div></div>
+      <div class="rows">
+        <div class="rowi rr" data-s="2"><i class="ms">app_registration</i><span><b>Register once;</b> the team approves the business</span></div>
+        <div class="rowi rr" data-s="2"><i class="ms">sell</i><span><b>Wholesale prices,</b> minimum order, pack sizes, stock</span></div>
+        <div class="rowi rr" data-s="2"><i class="ms">shopping_basket</i><span><b>Order online</b> from the website basket</span></div>
+        <div class="rowi rr" data-s="2"><i class="ms">chat</i><span><b>Or order directly</b> on WhatsApp and email</span></div>
+        <div class="rowi rr" data-s="2"><i class="ms">receipt_long</i><span><b>Confirmation and invoice</b> for every order</span></div>
+        <div class="rowi rr" data-s="2"><i class="ms">replay</i><span><b>Status, history</b> and one-tap reorder</span></div>
+        <div class="rowi rr" data-s="2"><i class="ms">verified</i><span><b>The same Shore-Checked quality</b> as export</span></div>
+      </div>
+      <div class="chan r" data-s="2"><p class="label">Order on</p><span class="chip"><i class="ms">language</i>Website</span><span class="chip"><i class="ms">chat</i>WhatsApp</span><span class="chip"><i class="ms">mail</i>Email</span></div>
+    </div>
+  </div>
+  <div class="foot"><p>OCEANFRESH · PHASE 1</p><p class="sig">DEDICATED BEING</p></div>
+  <aside class="note">How customers will see Oceanfresh. International buyers see how Oceanfresh works, check every product and certificate, and enquire or order directly on WhatsApp and email. Indian wholesalers register once, see wholesale prices and stock, and order online, on WhatsApp or by email, with invoices and one-tap reorder. Every enquiry and order lands directly with the team in India. Click 1: international buyers. Click 2: Indian wholesalers.</aside>
+</section>
+
 <!-- 16 · home -->
 <section class="slide light" data-title="Global home page" data-sky="day" data-hz="1060,30,.25">
   <div class="topbar"></div>
@@ -1030,7 +1199,7 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
         <div class="blk b1 rp" data-s="1" style="--i:0">Your shore in India.</div>
         <div class="blk b2 rp" data-s="1" style="--i:1"><i class="ms">waves</i>From our shore today</div>
         <div class="blk b3 rp" data-s="1" style="--i:2"><i class="ms">set_meal</i>Species explorer</div>
-        <div class="blk b4 rp" data-s="1" style="--i:3">20 · 2 · 100%</div>
+        <div class="blk b4 rp" data-s="1" style="--i:3">30 · 2 · 100%</div>
         <div class="blk b5 rp" data-s="1" style="--i:4"><i class="ms">conveyor_belt</i>How we work</div>
         <div class="blk b6 rp" data-s="1" style="--i:5"><i class="ms">groups</i>Meet your people</div>
       </div>
@@ -1039,7 +1208,7 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
       <div class="card hl r" data-s="1" style="--i:0;--delay:80ms"><span class="num">1</span><p><b>Hero.</b> A silent film loop from India and “Your shore in India.”</p></div>
       <div class="card hl r" data-s="1" style="--i:1;--delay:80ms"><span class="num">2</span><p><b>From our shore today.</b> Season notes and the latest Shore Report.</p></div>
       <div class="card hl r" data-s="1" style="--i:2;--delay:80ms"><span class="num">3</span><p><b>Species explorer.</b> The icon set leads straight into products.</p></div>
-      <div class="card hl r" data-s="1" style="--i:3;--delay:80ms"><span class="num">4</span><p><b>Proof strip.</b> 20 years · 2 generations · 100% QC.</p></div>
+      <div class="card hl r" data-s="1" style="--i:3;--delay:80ms"><span class="num">4</span><p><b>Proof strip.</b> 30 years · 2 generations · 100% QC.</p></div>
       <div class="card hl r" data-s="1" style="--i:4;--delay:80ms"><span class="num">5</span><p><b>How we work.</b> Source, check, pack, ship, in four pictures.</p></div>
       <div class="card hl r" data-s="1" style="--i:5;--delay:80ms"><span class="num">6</span><p><b>Meet your people in India.</b> Names, languages spoken, WhatsApp and WeChat.</p></div>
     </div>
@@ -1386,7 +1555,7 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
 
 <div id="progress" aria-hidden="true"></div>
 <div id="counter" aria-hidden="true">01 / 28</div>
-<div id="hint" aria-hidden="true">→ / space next · ← back · N notes · O overview · F full screen</div>
+<div id="hint" aria-hidden="true">→ / space next · ← back · N notes · O overview · F full screen · T toggle doors</div>
 <div id="notes" role="dialog" aria-label="Speaker notes"><div class="meta"><span id="nMeta"></span><span>N to close</span></div><p class="txt" id="nTxt"></p><p class="next" id="nNext"></p></div>
 <div id="overview" role="dialog" aria-label="Slide overview"><h2>Overview · click a slide or press O to close</h2><div class="ov-grid" id="ovGrid"></div></div>
 <div class="sr" aria-live="polite" id="live"></div>
@@ -1512,9 +1681,19 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
       } else { cnt.textContent = 0; ring.style.strokeDasharray = '0 100'; }
     },
     'Roadmap'(s, k) { const sw = s.querySelector('.sweep'); sw.classList.remove('go'); if (k === 1 && s._step === 1 && !reduced()) { void sw.offsetWidth; sw.classList.add('go'); } },
-    'Backend'(s) { s.querySelector('.feeds').classList.toggle('in', s._step >= 2); }
+    'Backend'(s) { s.querySelector('.feeds').classList.toggle('in', s._step >= 2); },
+    'Hero preview'(s) { setDemo(s.querySelector('.demo'), s._step >= 1 ? 'direct' : 'global'); }
   };
   const runHook = (s, k) => hooks[s.dataset.title]?.(s, k);
+  function setDemo(d, mode) {
+    if (!d) return;
+    d.dataset.mode = mode;
+    d.querySelector('.demo-toggle')?.setAttribute('aria-pressed', mode === 'direct' ? 'true' : 'false');
+    d.querySelector('.hero-g').setAttribute('aria-hidden', mode === 'direct' ? 'true' : 'false');
+    d.querySelector('.hero-d').setAttribute('aria-hidden', mode === 'direct' ? 'false' : 'true');
+    document.getElementById('live').textContent = ( mode === 'direct' ? 'Showing Oceanfresh Direct' : 'Showing Oceanfresh Global');
+  }
+  const flipDemo = d => d && setDemo(d, d.dataset.mode === 'direct' ? 'global' : 'direct');
 
   /* ---------- Step reveal / hide ---------- */
   function reveal(s, k) {
@@ -1755,6 +1934,7 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
       c.querySelectorAll('.count').forEach(e => e.textContent = fmt(e, +e.dataset.to));
       c.querySelectorAll('[data-lift]').forEach(e => e.classList.add('lift'));
       c.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+      c.querySelectorAll('button').forEach(e => { e.tabIndex = -1; });
       f.append(c); b.append(f);
       const cap = document.createElement('span'); cap.textContent = `${pad(i + 1)} · ${s.dataset.title}`; b.append(cap);
       b.addEventListener('click', e => { e.stopPropagation(); toggleOverview(false); jump(i, false); });
@@ -1781,6 +1961,7 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     const k = e.key;
     if (ov.classList.contains('open')) { if (k === 'Escape' || k === 'o' || k === 'O') { e.preventDefault(); toggleOverview(false); } return; }
+    if ((k === ' ' || k === 'Enter') && document.activeElement?.classList.contains('demo-toggle')) { e.preventDefault(); flipDemo(document.activeElement.closest('.demo')); return; }
     if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); e.shiftKey ? jump(Math.min(N - 1, cur + 1), false) : next(); }
     else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); e.shiftKey ? jump(Math.max(0, cur - 1), true) : prev(); }
     else if (k === 'Home') { e.preventDefault(); jump(0, false); }
@@ -1790,8 +1971,14 @@ body.lightmode #counter,body.lightmode #hint{color:var(--text-muted)}
     else if (k === 'o' || k === 'O') toggleOverview(true);
     else if (k === 'Escape') toggleNotes(false);
     else if (k === '?') flashHint(4000);
+    else if (k === 't' || k === 'T') flipDemo(slides[cur].querySelector('.demo'));
   });
-  addEventListener('click', e => { if (e.target.closest('#notes,#overview')) return; if (e.clientX < innerWidth * .2) prev(); else next(); });
+  addEventListener('click', e => {
+    if (e.target.closest('#notes,#overview')) return;
+    const tg = e.target.closest('.demo-toggle');
+    if (tg) { flipDemo(tg.closest('.demo')); if (e.detail > 0) tg.blur(); return; }
+    if (e.clientX < innerWidth * .2) prev(); else next();
+  });
 
   /* ---------- Start ---------- */
   slides.forEach(s => { s._step = 0; retire(s); });
